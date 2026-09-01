@@ -215,6 +215,17 @@ export class SettingsPanel {
         }
     }
 
+    /**
+     * Writes the settings to the device.
+     *
+     * Public because the panel is not the only control that changes a setting:
+     * the recording poses are switched from the gesture list as well, and
+     * persistence belongs to whoever owns the stored shape, which is this.
+     */
+    save(): void {
+        this.persist();
+    }
+
     private persist(): void {
         const state: Record<string, string> = {};
 

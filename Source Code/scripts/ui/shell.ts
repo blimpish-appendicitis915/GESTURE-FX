@@ -169,6 +169,8 @@ export interface Shell {
 
     // --- Shared ---------------------------------------------------------
     tooltip: HTMLElement;
+    tutorialOverlay: HTMLElement;
+    tutorialHost: HTMLElement;
 }
 
 /** Resolves the shell. Called once, before anything else runs. */
@@ -269,5 +271,7 @@ export function resolveShell(): Shell {
         restyleFootnote: role('restyle-footnote'),
 
         tooltip: role('tooltip'),
+        tutorialOverlay: role('overlay-tutorial'),
+        tutorialHost: role('tutorial-host'),
     };
 }

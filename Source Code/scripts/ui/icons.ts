@@ -29,6 +29,19 @@ function glyph(body: string): string {
     return `<svg ${ATTRIBUTES}>${body}</svg>`;
 }
 
+/**
+ * The recording poses: a ring of thumb and finger, with a record dot inside it.
+ *
+ * Not in `GESTURE_ICONS`, because that map is keyed by the identifiers of the
+ * gestures bound to effects and these two poses are bound to the recorder.
+ */
+export const RECORDING_CUE_ICON = glyph(`
+    <circle cx="9" cy="14" r="4.4" />
+    <circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none" />
+    <path d="M12.2 10.9 15 6.6a1.3 1.3 0 0 1 2.2 1.4l-2 3.2" />
+    <path d="M15.2 11.2 18 7.2a1.3 1.3 0 0 1 2.2 1.4L18 12.6a5.4 5.4 0 0 1-4.6 2.6" />
+`);
+
 export const GESTURE_ICONS: Record<GestureId, string> = {
     /** An open hand with a rotation arc around it. */
     'palm-flip': glyph(`

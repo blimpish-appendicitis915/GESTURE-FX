@@ -47,3 +47,29 @@ export function markGuideSeen(): void {
         // which is a smaller cost than failing to start.
     }
 }
+
+const TUTORIAL_KEY = 'gesture-fx.tutorial.seen';
+
+/**
+ * Whether the walkthrough has been offered before.
+ *
+ * Offered rather than completed. It is skippable at every step, so completing
+ * it is not a thing to wait for, and showing it again to someone who chose to
+ * leave it would be a nag rather than an introduction.
+ */
+export function hasSeenTutorial(): boolean {
+    try {
+        return window.localStorage.getItem(TUTORIAL_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+/** Records that the walkthrough has been offered. */
+export function markTutorialSeen(): void {
+    try {
+        window.localStorage.setItem(TUTORIAL_KEY, 'true');
+    } catch {
+        // Storage is unavailable, so it is offered again next visit.
+    }
+}

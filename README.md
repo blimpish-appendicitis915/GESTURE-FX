@@ -376,9 +376,31 @@ useful is even looked for, so the palm you are holding while recording cannot
 start a second take, and after either fires there is a two second lock-out.
 
 > [!TIP]
-> **Off until you switch it on**, in settings. It is the one control here that
-> acts on a pose rather than a press, so whether to arm it should be your
-> decision rather than a default you discover.
+> **Off until you switch it on.** It sits with the other gestures in the list
+> beside the viewfinder, and again in settings, so it is armed and disarmed
+> wherever you happen to be looking. It is the one control here that acts on a
+> pose rather than a press, so that should be your decision rather than a
+> default you discover.
+
+<br>
+
+### Find out what works on your device
+
+The first time the camera goes live you are offered a walkthrough, and it is in
+settings under **Try the controls** afterwards. Eleven steps: show a hand, each
+of the five gestures, both recording poses, then the microphone and speech.
+
+Every step is an observation rather than an instruction. The gesture steps pass
+when that detector fires through the shipped engine. The microphone step draws
+the input level from the samples, so a granted permission that carries no audio
+looks different from a working one. The speech step prints what the recogniser
+actually heard, so a misheard word looks different from silence.
+
+> [!NOTE]
+> That is the point of it. A refused microphone, a browser listening in the
+> wrong language and a working setup are indistinguishable from the outside and
+> all three produce the same silence. Here they produce three different results,
+> and the summary at the end says which you have. Every step can be skipped.
 
 <br>
 

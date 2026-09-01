@@ -476,6 +476,30 @@
  * system's own picker. On a phone that is a full-height wheel that can be
  * operated one-handed, which no custom control would match.
  */
+/**
+ * What the recording row says instead of an effect menu.
+ *
+ * Sized and placed like the menu beside it so the column of rows keeps one
+ * edge, but plainly not a control: the poses are bound to the recorder and
+ * there is nothing to choose.
+ */
+.chip__note {
+    margin-left: auto;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+
+    border: 1px dashed var(--line-subtle);
+    border-radius: var(--radius-sm);
+
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
 .chip__select {
     min-width: 0;
     margin-left: auto;

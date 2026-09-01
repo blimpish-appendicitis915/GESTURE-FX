@@ -29,7 +29,7 @@
 import { EFFECTS } from '../effects/registry';
 import type { EffectId } from '../effects/types';
 import type { GestureDetector, GestureId } from '../gestures/types';
-import { GESTURE_ICONS } from './icons';
+import { GESTURE_ICONS, RECORDING_CUE_ICON } from './icons';
 
 /** How long a row stays lit after its gesture fires, in milliseconds. */
 const FLASH_MS = 700;
@@ -46,18 +46,108 @@ export class GestureList {
     private readonly rows = new Map<GestureId, HTMLElement>();
     private readonly timers = new Map<GestureId, number>();
 
+    /** The recording row, which is not keyed by a gesture identifier. */
+    private cueRow: HTMLElement | null = null;
+    private cueToggle: HTMLButtonElement | null = null;
+    private cueTimer = 0;
+
     constructor(private readonly container: HTMLElement) {}
 
     /** Renders one row per registered gesture. */
     build(detectors: readonly GestureDetector[], handlers: GestureListHandlers): void {
         this.container.replaceChildren();
         this.rows.clear();
+        this.cueRow = null;
+        this.cueToggle = null;
 
         for (const detector of detectors) {
             const row = this.createRow(detector, handlers);
             this.rows.set(detector.id, row);
             this.container.append(row);
         }
+    }
+
+    /**
+     * Appends the row for the recording poses.
+     *
+     * It sits with the gestures rather than in settings alone, because this is
+     * the list a user reads to learn what their hands can do and the only one
+     * visible while a take is running. It carries no effect menu: the poses are
+     * bound to the recorder and cannot be pointed at something else, which is
+     * the honest presentation of what they are rather than a menu with one
+     * entry.
+     */
+    addRecordingCue(enabled: boolean, onToggle: (enabled: boolean) => void): void {
+        const row = document.createElement('div');
+        row.className = 'chip';
+        row.dataset.gesture = 'recording-cue';
+        row.dataset.enabled = String(enabled);
+
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'chip__toggle';
+        toggle.setAttribute('aria-pressed', String(enabled));
+        toggle.dataset.tooltip =
+            'Hold a ring, thumb and index tips together with the other three fingers up, '
+            + 'to start a take. Hold an open palm to stop. Select to switch these off.';
+        toggle.setAttribute(
+            'aria-label',
+            'Record. Hold a ring to start a take, hold an open palm to stop.',
+        );
+
+        const icon = document.createElement('span');
+        icon.className = 'chip__icon';
+        icon.innerHTML = RECORDING_CUE_ICON;
+
+        const label = document.createElement('span');
+        label.className = 'chip__label';
+        label.textContent = 'Record';
+
+        toggle.append(icon, label);
+
+        const note = document.createElement('span');
+        note.className = 'chip__note';
+        note.textContent = 'Ring · Palm';
+
+        toggle.addEventListener('click', () => {
+            const on = toggle.getAttribute('aria-pressed') !== 'true';
+
+            toggle.setAttribute('aria-pressed', String(on));
+            row.dataset.enabled = String(on);
+            onToggle(on);
+        });
+
+        row.append(toggle, note);
+
+        this.cueRow = row;
+        this.cueToggle = toggle;
+        this.container.append(row);
+    }
+
+    /** Puts the recording row in step with the setting, changed elsewhere. */
+    setRecordingCueEnabled(enabled: boolean): void {
+        if (!this.cueRow || !this.cueToggle) {
+            return;
+        }
+
+        this.cueToggle.setAttribute('aria-pressed', String(enabled));
+        this.cueRow.dataset.enabled = String(enabled);
+    }
+
+    /** Lights the recording row when a pose completes. */
+    flashRecordingCue(): void {
+        if (!this.cueRow) {
+            return;
+        }
+
+        window.clearTimeout(this.cueTimer);
+        this.cueRow.dataset.fired = 'true';
+
+        this.cueTimer = window.setTimeout(() => {
+            if (this.cueRow) {
+                this.cueRow.dataset.fired = 'false';
+            }
+        }, FLASH_MS);
     }
 
     private createRow(detector: GestureDetector, handlers: GestureListHandlers): HTMLElement {

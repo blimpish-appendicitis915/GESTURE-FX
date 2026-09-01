@@ -55,9 +55,10 @@ import { SettingsPanel } from '../ui/settings';
 import { shareApplication } from '../ui/share-app';
 import { Countdown } from '../ui/countdown';
 import { GestureList } from '../ui/gesture-list';
-import { hasSeenGuide, markGuideSeen } from '../ui/guide';
+import { hasSeenGuide, hasSeenTutorial, markGuideSeen, markTutorialSeen } from '../ui/guide';
 import { createFrameGuide, type FrameGuide } from '../ui/frame-guide';
 import { RestylePanel } from '../ui/restyle';
+import { Tutorial } from '../ui/tutorial';
 import { restoreKey } from '../ai/credentials';
 import { OverlayController, toPresentableError } from '../ui/overlays';
 import { ReviewPanel } from '../ui/review';
@@ -166,6 +167,8 @@ export class Application {
             this.toast.show('Voice control', message);
         },
         (transcript) => {
+            this.tutorial.heard(transcript);
+
             // Shown so that "heard the wrong words" and "heard nothing at all"
             // are distinguishable from the outside.
             this.toast.show('Heard', `“${transcript}”, which is not a command`);
@@ -179,6 +182,23 @@ export class Application {
 
     /** Starts and stops a take from a held pose, when the setting allows it. */
     private readonly recordingCue = new RecordingCueDetector();
+
+    /** The walkthrough, which observes the running application. */
+    private tutorial!: Tutorial;
+
+    /** Analyser and source for the walkthrough's level meter. */
+    private levelContext: AudioContext | null = null;
+    private levelAnalyser: AnalyserNode | null = null;
+    /**
+     * Typed against a concrete ArrayBuffer.
+     *
+     * A bare Uint8Array is ArrayBufferLike, which admits a SharedArrayBuffer and
+     * which the analyser will not accept.
+     */
+    private levelBuffer: Uint8Array<ArrayBuffer> | null = null;
+
+    /** Set while the walkthrough turned voice control on for its own step. */
+    private voiceForTutorial = false;
 
     /**
      * Sound is recorded by default.
@@ -255,6 +275,11 @@ export class Application {
         this.toast = new Toast(this.shell.toast, this.shell.toastGesture, this.shell.toastEffect);
         this.tooltips = new TooltipController(this.shell.tooltip);
         this.frameGuide = createFrameGuide(this.shell.viewfinder);
+
+        this.tutorial = new Tutorial(this.shell.tutorialOverlay, this.shell.tutorialHost, {
+            onOpen: () => this.beginTutorialListening(),
+            onClose: () => this.endTutorialListening(),
+        });
 
         this.restylePanel = new RestylePanel(
             {
@@ -341,6 +366,25 @@ export class Application {
         this.gestureList.build(DETECTORS, {
             onToggle: (id, enabled) => this.engine.setEnabled(id, enabled),
             onRebind: (id, effectId) => this.effectBindings.set(id, effectId),
+        });
+
+        // The recording poses sit with the gestures because that is what they
+        // are. The switch here and the row in settings write the same value.
+        this.gestureList.addRecordingCue(SETTINGS.recordingGestures, (enabled) => {
+            SETTINGS.recordingGestures = enabled;
+            this.recordingCue.reset(performance.now());
+
+            // The panel is told rather than left to notice, so the two controls
+            // never disagree, and it is the panel that owns persistence.
+            this.settingsPanel.refresh();
+            this.settingsPanel.save();
+
+            this.toast.show(
+                'Recording gestures',
+                enabled
+                    ? 'hold a ring to start a take, an open palm to stop'
+                    : 'switched off; the button, voice and keyboard still work',
+            );
         });
 
         this.aspectControl.build((aspect) => this.onAspectChange(aspect));
@@ -479,6 +523,18 @@ export class Application {
         this.shell.microphoneButton.addEventListener('click', () => {
             void this.toggleMicrophone();
         });
+
+        document.querySelector('[data-action="open-tutorial"]')
+            ?.addEventListener('click', () => {
+                this.closePanel();
+                this.tutorial.start();
+            });
+
+        document.querySelector('[data-action="tutorial-skip"]')
+            ?.addEventListener('click', () => this.tutorial.skip());
+
+        document.querySelector('[data-action="tutorial-close"]')
+            ?.addEventListener('click', () => this.tutorial.close());
 
         this.shell.switchCameraButton.addEventListener('click', () => {
             void this.switchCamera();
@@ -725,6 +781,8 @@ export class Application {
     private onSettingsChanged(): void {
         this.engine.reset();
         this.styleStrip.select(SETTINGS.portalStyle);
+        this.gestureList.setRecordingCueEnabled(SETTINGS.recordingGestures);
+        this.recordingCue.reset(performance.now());
 
         void this.applyAutoFrame();
         this.applyVoiceControl();
@@ -855,6 +913,14 @@ export class Application {
         // live and neither is allowed to fail the session.
         void this.applyAutoFrame();
         this.applyVoiceControl();
+
+        // Offered once, on the first visit that reaches a live camera. Here
+        // rather than after the guide, because the first step is the camera and
+        // there is nothing to observe until it is running.
+        if (!hasSeenTutorial()) {
+            markTutorialSeen();
+            this.tutorial.start();
+        }
     }
 
     /**
@@ -927,6 +993,126 @@ export class Application {
      * poses are not effects. Keeping them apart means a user cannot bind the
      * pose that stops a take to something else and lose the ability to stop.
      */
+    /**
+     * Drives the walkthrough from the frame loop.
+     *
+     * The camera and hand steps are satisfied here because neither is an event;
+     * they are conditions, and the loop is where conditions are observed. The
+     * pose steps are satisfied by the cue detector, which runs during the
+     * walkthrough regardless of the setting, because the point is to find out
+     * whether the poses work before deciding to switch them on.
+     */
+    private readTutorial(tracking: TrackingFrame | null, now: number): void {
+        if (!this.tutorial.isOpen) {
+            return;
+        }
+
+        const step = this.tutorial.current;
+
+        if (step === 'camera') {
+            this.tutorial.cameraReady();
+            return;
+        }
+
+        if (step === 'hand' && tracking && tracking.hands.length > 0) {
+            this.tutorial.observe('hand');
+            return;
+        }
+
+        if (step === 'ring' || step === 'palm') {
+            const cue = this.recordingCue.update(tracking, now, step === 'palm');
+
+            if (cue) {
+                this.gestureList.flashRecordingCue();
+                this.tutorial.observe(step);
+            }
+
+            return;
+        }
+
+        if (step === 'microphone') {
+            this.tutorial.setLevel(this.microphoneLevel(), now);
+        }
+    }
+
+    /**
+     * The current microphone level, from the samples rather than the permission.
+     *
+     * A granted permission and a working microphone are different things, and
+     * the whole reason this step exists is that the difference is invisible
+     * everywhere else in the interface.
+     */
+    private microphoneLevel(): number {
+        if (!this.levelAnalyser || !this.levelBuffer) {
+            return 0;
+        }
+
+        this.levelAnalyser.getByteTimeDomainData(this.levelBuffer);
+
+        let peak = 0;
+
+        for (const sample of this.levelBuffer) {
+            peak = Math.max(peak, Math.abs(sample - 128) / 128);
+        }
+
+        return peak;
+    }
+
+    /** Opens the microphone and the recogniser for the duration of the walkthrough. */
+    private async beginTutorialListening(): Promise<void> {
+        const state = await this.microphone.open();
+
+        if (state === 'granted') {
+            try {
+                const context = new AudioContext();
+                const analyser = context.createAnalyser();
+
+                analyser.fftSize = 1024;
+
+                context.createMediaStreamSource(new MediaStream(this.microphone.tracks()))
+                    .connect(analyser);
+
+                this.levelContext = context;
+                this.levelAnalyser = analyser;
+                // Backed by an explicit ArrayBuffer: the default is typed as
+                // ArrayBufferLike, which the analyser will not accept.
+                this.levelBuffer = new Uint8Array(new ArrayBuffer(analyser.fftSize));
+            } catch (error) {
+                console.warn('[gesture-fx] level meter unavailable', error);
+            }
+        }
+
+        // Voice is switched on for the walkthrough even when the setting is off,
+        // because the step exists to find out whether it works at all.
+        if (!SETTINGS.voiceControl && isVoiceSupported()) {
+            this.voiceForTutorial = true;
+            this.voice.start();
+        }
+    }
+
+    /** Puts the microphone and the recogniser back the way they were. */
+    private endTutorialListening(): void {
+        this.levelContext?.close().catch(() => {
+            // Closing a context that is already closed is not an error worth
+            // reporting to anyone.
+        });
+
+        this.levelContext = null;
+        this.levelAnalyser = null;
+        this.levelBuffer = null;
+
+        if (this.voiceForTutorial) {
+            this.voiceForTutorial = false;
+            this.voice.stop();
+        }
+
+        if (this.state !== 'recording') {
+            this.microphone.close();
+        }
+
+        this.recordingCue.reset(performance.now());
+    }
+
     private readRecordingCue(tracking: TrackingFrame | null, now: number): void {
         if (!SETTINGS.recordingGestures || !this.recordingSupport.supported) {
             return;
@@ -945,6 +1131,8 @@ export class Application {
         if (!cue) {
             return;
         }
+
+        this.gestureList.flashRecordingCue();
 
         this.toast.show(
             cue === 'start' ? 'Ring held' : 'Palm held',
@@ -986,6 +1174,14 @@ export class Application {
     }
 
     private onVoiceCommand(command: VoiceCommand): void {
+        // A recognised command is the strongest possible pass for that step, and
+        // it is swallowed here rather than acted on: the walkthrough should not
+        // start a take because the user was asked to say the word.
+        if (this.tutorial.isOpen) {
+            this.tutorial.heard(command.kind === 'style' ? command.style : command.kind);
+            return;
+        }
+
         if (command.kind === 'style') {
             SETTINGS.portalStyle = command.style;
             this.settingsPanel.refresh();
@@ -1066,6 +1262,7 @@ export class Application {
         // rate budget, which is not the same as finding no hands.
         const tracking = this.tracker.detect(video, now);
 
+        this.readTutorial(tracking, now);
         this.readRecordingCue(tracking, now);
 
         for (const trigger of this.engine.update(tracking, now)) {
@@ -1117,6 +1314,8 @@ export class Application {
 
     /** Starts the effect a gesture asked for, and reports it in the interface. */
     private onGesture(trigger: GestureTrigger, now: number): void {
+        this.tutorial.observe(trigger.gestureId);
+
         const detector = DETECTORS.find((candidate) => candidate.id === trigger.gestureId);
 
         // The user's binding takes precedence over the detector's default.
