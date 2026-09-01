@@ -116,6 +116,16 @@ export interface HandFeatures {
      */
     victorySeparation: number;
 
+    /**
+     * Thumb to index fingertip separation, in hand spans.
+     *
+     * Near zero when the two tips meet, which is the ring at the centre of the
+     * OK sign. Measured in spans for the same reason as everything else here:
+     * a hand twice as far away halves every distance in the image, and a
+     * threshold in spans does not notice.
+     */
+    pinch: number;
+
     /** Fraction of the frame covered by the hand's bounding box. */
     coverage: number;
 }

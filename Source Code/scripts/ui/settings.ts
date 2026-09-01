@@ -133,6 +133,22 @@ export class SettingsPanel {
                 },
             },
             {
+                key: 'recordingGestures',
+                label: 'Start and stop with a gesture',
+                description:
+                    'Make a ring with your thumb and index finger, other three fingers up, '
+                    + 'and hold it to start a take. Hold an open palm to stop. Nothing is sent '
+                    + 'anywhere: this is the camera you have already allowed.',
+                choices: [
+                    { value: 'false', label: 'Off', hint: 'Only the button, voice and keyboard start a take' },
+                    { value: 'true', label: 'On', hint: 'A held ring starts a take, a held palm ends it' },
+                ],
+                read: () => String(SETTINGS.recordingGestures),
+                write: (value) => {
+                    SETTINGS.recordingGestures = value === 'true';
+                },
+            },
+            {
                 key: 'sensitivity',
                 label: 'Gesture sensitivity',
                 description:

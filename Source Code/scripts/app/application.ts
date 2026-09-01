@@ -37,6 +37,7 @@ import type { EffectId } from '../effects/types';
 import { EffectTimeline } from '../effects/timeline';
 import { DETECTORS } from '../gestures/detectors/index';
 import { GestureEngine } from '../gestures/engine';
+import { RecordingCueDetector } from '../gestures/recording-cue';
 import type { GestureId, GestureTrigger } from '../gestures/types';
 import { probeRecording, type RecordingSupport } from '../recording/capabilities';
 import { canShareVideo, downloadRecording, shareRecording } from '../recording/export';
@@ -170,6 +171,9 @@ export class Application {
     private state: AppState = 'boot';
     private frameHandle = 0;
     private readonly microphone = new Microphone();
+
+    /** Starts and stops a take from a held pose, when the setting allows it. */
+    private readonly recordingCue = new RecordingCueDetector();
 
     /**
      * Sound is recorded by default.
@@ -910,6 +914,41 @@ export class Application {
      * showing over the preview is dismissed first, and a command that genuinely
      * cannot be acted on says why.
      */
+    /**
+     * Acts on a held pose, when the setting allows it.
+     *
+     * Read on every tracked frame and deliberately not routed through the
+     * gesture engine: that engine maps gestures onto effects, and these two
+     * poses are not effects. Keeping them apart means a user cannot bind the
+     * pose that stops a take to something else and lose the ability to stop.
+     */
+    private readRecordingCue(tracking: TrackingFrame | null, now: number): void {
+        if (!SETTINGS.recordingGestures || !this.recordingSupport.supported) {
+            return;
+        }
+
+        const recording = this.state === 'recording';
+
+        // Only these two states are meaningful. A pose struck while a panel is
+        // open or a take is being reviewed is not an instruction.
+        if (!recording && this.state !== 'ready') {
+            return;
+        }
+
+        const cue = this.recordingCue.update(tracking, now, recording);
+
+        if (!cue) {
+            return;
+        }
+
+        this.toast.show(
+            cue === 'start' ? 'Ring held' : 'Palm held',
+            cue === 'start' ? 'starting the recording' : 'stopping the recording',
+        );
+
+        void this.onRecordPressed();
+    }
+
     private async startTakeByVoice(): Promise<void> {
         if (!this.recordingSupport.supported) {
             this.toast.show('Heard', 'this browser cannot record, so there is nothing to start');
@@ -1021,6 +1060,8 @@ export class Application {
         // The tracker returns null when it skips a frame to stay inside its
         // rate budget, which is not the same as finding no hands.
         const tracking = this.tracker.detect(video, now);
+
+        this.readRecordingCue(tracking, now);
 
         for (const trigger of this.engine.update(tracking, now)) {
             this.onGesture(trigger, now);
@@ -1161,6 +1202,7 @@ export class Application {
         this.setGestureSheetOpen(false);
 
         this.engine.reset();
+        this.recordingCue.reset(performance.now());
         this.fingerFrame.reset();
         this.timeline.clear();
         this.gestureList.clearHighlights();

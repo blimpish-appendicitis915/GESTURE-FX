@@ -372,6 +372,44 @@ export const AUTO_FRAME = {
  * this is the one feature in the application that is not local, and the
  * interface says so rather than implying otherwise.
  */
+/**
+ * Starting and stopping a take from a held hand pose.
+ *
+ * A ring, the thumb and index tips meeting with the other three fingers
+ * extended, starts a take. An open spread palm, held still, ends it. Both are
+ * off until switched on, because a control that fires from a pose is a control
+ * that can fire when it was not meant to, and that should be the user's choice.
+ */
+export const RECORDING_GESTURES = {
+    /**
+     * How long the pose must be held.
+     *
+     * A hand passes through many shapes on the way between two others and some
+     * of them are briefly a ring. Three quarters of a second is longer than any
+     * of those transits and short enough not to feel like waiting.
+     */
+    holdMs: 750,
+
+    /**
+     * Frames the pose must be seen on, as well as the elapsed time.
+     *
+     * Time alone is satisfied by two frames far apart with a dropout between
+     * them, which is exactly the case a held pose should not be inferred from.
+     * At 24 Hz a 750 ms hold is eighteen frames, so twelve leaves room for a
+     * few misses without accepting a gap.
+     */
+    minimumFrames: 12,
+
+    /**
+     * How long after firing before another cue is accepted.
+     *
+     * The hand is still in the pose the instant after it fires, and the palm
+     * that ends a take is often still up when the take ends. Without this, one
+     * held palm would stop a take and its release would start the next.
+     */
+    lockoutMs: 2_000,
+} as const;
+
 export const VOICE = {
     /**
      * How long after a recognised command the next one is ignored.
@@ -651,4 +689,14 @@ export const SETTINGS = {
      * be chosen rather than discovered.
      */
     voiceControl: false,
+
+    /**
+     * Whether a held hand pose starts and stops a take.
+     *
+     * Off by default because it is the only control in the application that
+     * acts on a pose rather than on a press, and a pose can be struck by
+     * accident. On, it is the hands-free path for a browser with no speech
+     * interface, and the one that sends nothing anywhere.
+     */
+    recordingGestures: false,
 };

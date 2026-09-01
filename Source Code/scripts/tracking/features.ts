@@ -109,6 +109,9 @@ export function extractFeatures(landmarks: readonly Landmark[]): HandFeatures {
         victorySeparation:
             distance(landmarks[LANDMARK.INDEX_TIP] as Vec2, landmarks[LANDMARK.MIDDLE_TIP] as Vec2) /
             span,
+        pinch:
+            distance(landmarks[LANDMARK.THUMB_TIP] as Vec2, landmarks[LANDMARK.INDEX_TIP] as Vec2) /
+            span,
         coverage: computeCoverage(landmarks),
     };
 }
@@ -162,6 +165,15 @@ function computeCoverage(landmarks: readonly Landmark[]): number {
 }
 
 /** A flat, open, spread hand: the pose a palm flip begins and ends in. */
+/**
+ * How close the thumb and index tips must be to count as a ring, in hand spans.
+ *
+ * A span is wrist to middle knuckle. At a quarter of one the tips are touching
+ * or nearly so; a relaxed hand holds them roughly a span apart, so there is a
+ * wide margin either side of this and no need for it to be tuned per user.
+ */
+const RING_MAXIMUM_PINCH = 0.25;
+
 export function isOpenPalm(features: HandFeatures): boolean {
     return features.extendedCount >= 4 && features.spread > 0.9;
 }
@@ -213,4 +225,30 @@ export function isVictory(features: HandFeatures): boolean {
     const folded = extension.ring < 0.62 && extension.pinky < 0.62;
 
     return raised && folded && features.victorySeparation >= VICTORY_MINIMUM_SEPARATION;
+}
+
+
+/**
+ * The ring at the centre of an OK sign: thumb and index tips meeting, with the
+ * other three fingers extended.
+ *
+ * The three raised fingers are what make this safe to use as a control. A
+ * thumb and index tip come together whenever a hand is relaxed or partly
+ * closed, and a fist brings them together too; requiring the rest of the hand
+ * to be open excludes both, and leaves a pose nobody makes by accident.
+ *
+ * It is also disjoint from the two-hand frame, where the thumb is held across
+ * the palm well away from the raised index.
+ */
+export function isRing(features: HandFeatures): boolean {
+    const { extension } = features;
+
+    const closed = features.pinch <= RING_MAXIMUM_PINCH;
+
+    const others =
+        extension.middle >= EXTENDED_THRESHOLD &&
+        extension.ring >= EXTENDED_THRESHOLD &&
+        extension.pinky >= EXTENDED_THRESHOLD;
+
+    return closed && others;
 }

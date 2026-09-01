@@ -94,6 +94,15 @@ not have to be broken to reach the button. It uses the browser's own speech
 interface, which in Chrome and Edge transmits the audio to the browser vendor and
 in Safari recognises on the device.
 
+A held hand pose starts and stops a take without touching anything and without
+the network. A ring, the thumb and index tips meeting with the other three
+fingers extended, starts one; an open spread palm ends it. Each must be held for
+three quarters of a second and for a minimum number of consecutive frames, so a
+shape the hand passes through is not mistaken for one it is put into, and a two
+second lock-out follows each. Only the pose that is useful in the current state
+is looked for. This is off by default because it acts on a pose rather than a
+press.
+
 The Gemini restyle sends one finished take to Google's video editing model
 against the user's own API key, and shows the result through the tracked window.
 The take is recorded clean for this, with the window drawn over the viewfinder

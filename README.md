@@ -109,7 +109,7 @@ does. The window needs the second, because the effect has to be in the frame
 being recorded and not in a file produced afterwards.
 
 > [!IMPORTANT]
-> **With thanks to Mega Satish and Hasan Rizvi.** The decomposition this window
+> **Special thanks to Mega Satish and Hasan Rizvi.** The decomposition this window
 > uses comes from work I did with them, and the credit for that work is theirs
 > as much as mine.
 >
@@ -350,6 +350,35 @@ Voice control starts and stops a take, and changes the frame style, so both hand
 > **This is the one feature that is not local.** Chrome and Edge implement the Web Speech API by sending microphone audio to the browser vendor's own service. Safari recognises on the device. No page can change that or observe it.
 >
 > It is therefore **off until you switch it on**, the settings panel names which of the two cases your browser is in, and an indicator sits over the viewfinder for as long as it is listening.
+
+<br>
+
+### Or show it your hand
+
+Voice needs a browser with a speech interface and a willingness to send audio to
+its vendor. This needs neither. It is the camera you have already allowed.
+
+| Hold | Result |
+| --- | --- |
+| A **ring**, thumb and index tips together, other three fingers up | Start a take |
+| An **open palm**, fingers spread | End it |
+
+Hold either for three quarters of a second. That delay is the feature: a hand
+passes through many shapes on the way between two others, and some of them are
+briefly a ring. Holding turns a shape the hand passes through into a shape the
+hand is put into.
+
+Neither pose collides with the five gestures bound to effects, and the two
+cannot be confused with each other: a ring curls the index down to meet the
+thumb, an open palm needs four fingers up, and the code requires that a palm is
+not also a ring rather than leaving it to the arithmetic. Only the pose that is
+useful is even looked for, so the palm you are holding while recording cannot
+start a second take, and after either fires there is a two second lock-out.
+
+> [!TIP]
+> **Off until you switch it on**, in settings. It is the one control here that
+> acts on a pose rather than a press, so whether to arm it should be your
+> decision rather than a default you discover.
 
 <br>
 
