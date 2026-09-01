@@ -1,0 +1,133 @@
+# GESTURE-FX
+
+> A browser application that detects hand gestures in real time and fires camera
+> effects into a video while it records, and that turns the rectangle made by two
+> hands into a window showing the same scene redrawn in another medium. It runs
+> on the client: no server, no upload, no key and no editing step. Two optional
+> features use the network and are off until switched on. Open source under the
+> MIT licence, written by Amey Thakur.
+
+Live application: https://amey-thakur.github.io/GESTURE-FX/
+Repository: https://github.com/Amey-Thakur/GESTURE-FX
+Author: Amey Thakur, https://github.com/Amey-Thakur, ORCID 0000-0001-5644-1575
+
+## What it does
+
+A user opens the page, allows the camera, presses record, and performs a hand
+gesture. The gesture is recognised within a frame or two and a visual effect is
+composited onto the video at that instant. Because the recorder captures the
+composited canvas rather than the camera stream, the effect is present in the
+exported file as pixels, so the finished video needs no editing.
+
+## The two-hand window
+
+Holding both index fingers up and both thumbs across makes a rectangle. The four
+fingertips are the corners of a quadrilateral, and inside it the scene is redrawn
+in one of five media: a flat cel cartoon, a four-plate comic halftone, a pencil
+drawing, a four-ink screen print, or pen and ink. Each is a fragment shader, so
+all of them run at the full frame rate on the device.
+
+Coverage uses the even-odd rule rather than a triangulation. Crossing the hands
+makes the quadrilateral self-intersecting, at which point a triangle fan covers
+most of the bounding rectangle while the even-odd test renders the two lobes the
+boundary actually describes.
+
+The cartoon is an analytic realisation of the three-representation white-box
+decomposition: a surface from three iterations of a bilateral filter with a
+coarse-to-fine range schedule, a structure from luminance quantisation with a
+hyperbolic tangent band edge, and a texture from a difference of two equally
+weighted Gaussians. Equal weights matter: the difference is then exactly zero on
+any region of constant brightness, so one threshold draws the same line on a lit
+face and a dark coat.
+
+## Method, stated precisely
+
+The signature gesture is a palm flip, detected without a trained classifier.
+
+Taking the wrist, the index knuckle and the little finger knuckle, the two
+dimensional cross product of the two palm edges, normalised by their lengths, is
+the sine of the angle between those edges as projected onto the image, signed by
+the winding order of the triangle they span.
+
+Rotating a hand past edge-on reverses that winding, so the value changes sign,
+and because an edge-on palm projects to a line its magnitude falls to zero at the
+same instant. A palm flip is therefore a zero crossing of a single scalar, and
+the crossing is the exact frame of the flip.
+
+The method is invariant to mirroring, because mirroring negates the value
+everywhere and a crossing of a negated signal is still a crossing; invariant to
+hand size and distance, because the value is a bounded ratio; and agnostic to
+which hand is used. It needs no calibration and no training data.
+
+## Architecture
+
+- Hand landmarks: MediaPipe Tasks Vision 1.0.1, WebAssembly, Apache-2.0
+- Face detection, for optional auto-framing: BlazeFace short range, on device
+- Compositing: WebGL 2 fragment shaders, four passes, filter then abstraction
+  then window then effect. The middle two run only while the window is open
+- Recording: canvas.captureStream into MediaRecorder, MP4 preferred
+- Language: TypeScript, no framework, one runtime dependency
+- Hosting: static files on GitHub Pages, no backend of any kind
+
+Detection runs at a capped 24 Hz while rendering runs at the display refresh
+rate. A recognised gesture carries the timestamp of the instant it occurred, and
+the effect plays out on wall-clock time from that timestamp, so effect playback
+is independent of tracking performance.
+
+## Distinguishing feature
+
+A rewind buffer retains the last few seconds of frames on the GPU, so an effect
+can cut to what the camera saw earlier and back again. This approximates, inside
+one continuous recording, the two-take illusion of the social media trend that
+prompted the project. The project states plainly that the literal trend, in which
+a hand flip conceals an edit between two separately filmed takes, cannot be
+reproduced by any browser application, because the replacement subject is not in
+the frame.
+
+## Optional features that use the network
+
+Both are disabled until the user switches them on, both say what they do at the
+point of enabling, and both show an indicator while running.
+
+Voice control starts and stops a take by voice, so the two-handed gesture does
+not have to be broken to reach the button. It uses the browser's own speech
+interface, which in Chrome and Edge transmits the audio to the browser vendor and
+in Safari recognises on the device.
+
+The Gemini restyle sends one finished take to Google's video editing model
+against the user's own API key, and shows the result through the tracked window.
+The take is recorded clean for this, with the window drawn over the viewfinder
+rather than into the canvas, and the geometry of the window is kept alongside it
+so the composite can be made afterwards. Every prompt carries a fixed alignment
+constraint, because a model that reframes the shot puts the generated world
+beside the window instead of inside it.
+
+## Privacy
+
+With those two features off, no camera frame, recording, or item of user data
+leaves the device. There is no analytics, telemetry, error reporting, font
+network or cookie. After the first load the application works with the network
+switched off. Recordings are held in page memory and are discarded when the tab
+closes. A supplied API key is held in the tab and written to the device only on
+request.
+
+## Documentation
+
+- docs/SPECIFICATION.md, the feasibility study, architecture and limitations
+- docs/GESTURES.md, the detection derivation and how to add a gesture
+- docs/EFFECTS.md, how to add an effect or a filter
+- docs/BROWSER-SUPPORT.md, the tested device matrix and the known defects
+- PRIVACY.md, what is processed and what is stored
+
+## Preprint
+
+A preprint accompanies the repository, in paper/. It proves the detection
+criterion and its invariances, gives the coverage result for the self-intersecting
+window, derives the three parameters of the stylisation from the noise statistics
+rather than fixing them by inspection, and states the condition under which a
+window tracked in one clip may be composited over a generatively restyled version
+of it.
+
+## Licence
+
+MIT. Copyright 2026 Amey Thakur.

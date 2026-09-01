@@ -1,0 +1,58 @@
+name: Effect or filter proposal
+description: Propose a new visual effect or a new persistent filter.
+title: '[Effect] '
+labels: ['effect', 'enhancement']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An effect is one fragment shader against a documented uniform set.
+        [docs/EFFECTS.md](https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/EFFECTS.md)
+        has a worked example of each, and a pull request is welcome in place of
+        an issue.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Which is it
+      options:
+        - 'Effect, a momentary event a gesture fires'
+        - 'Filter, a persistent look applied to every frame'
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: What is it called
+      placeholder: Kaleidoscope, halftone, datamosh, infrared
+    validations:
+      required: true
+
+  - type: textarea
+    id: appearance
+    attributes:
+      label: What does the viewer see
+      description: One or two sentences, the way it would read in the interface.
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: How would the shader work
+      description: |
+        Roughly what the fragment shader does per pixel. Note if it needs more
+        than a handful of texture reads, since that is the cost that matters.
+      placeholder: Fold the coordinate about N axes around the centre, then sample once.
+    validations:
+      required: false
+
+  - type: input
+    id: reference
+    attributes:
+      label: A reference
+      description: A link or a description of somewhere this look appears.
+    validations:
+      required: false

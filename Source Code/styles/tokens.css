@@ -1,0 +1,308 @@
+/**
+ * File: styles/tokens.css
+ * Author: Amey Thakur
+ * GitHub: https://github.com/Amey-Thakur
+ * Repository: https://github.com/Amey-Thakur/GESTURE-FX
+ * Release Date: August 31 2026
+ * License: MIT
+ *
+ * Tech Stack: CSS Custom Properties
+ *
+ * Description:
+ * The design system. Every colour, measurement, radius, shadow and duration
+ * used anywhere in the interface is declared here, so no other stylesheet
+ * contains a literal value.
+ *
+ * The palette is taken from the product rather than chosen decoratively. Cyan
+ * and magenta are the two channels the chromatic split effect separates, so the
+ * accent colours of the interface are the colours the application itself makes.
+ *
+ * Two themes
+ * ----------
+ * Each raw colour is written exactly once, as a `--d-` or `--l-` value. The
+ * semantic tokens the rest of the stylesheets use are then pointed at one set
+ * or the other. Adding a colour therefore means editing one line, not two, and
+ * the two themes cannot drift apart.
+ *
+ * Dark is the default because this is a viewfinder: a dark surround keeps the
+ * eye on the live image and stops the interface reflecting off the user's face
+ * while they are being filmed. Light is offered for bright rooms and for anyone
+ * who simply prefers it.
+ *
+ * Resolution order: an explicit choice on the root element always wins; with no
+ * choice made, the operating system preference decides; failing both, dark.
+ */
+
+:root {
+    /* ==================================================================== */
+    /* Raw palettes. Each value appears exactly once in the project.        */
+    /* ==================================================================== */
+
+    /* --- Dark surfaces --------------------------------------------------- */
+    --d-surface-950: #06070a;
+    --d-surface-900: #0b0d12;
+    --d-surface-850: #11141b;
+    --d-surface-800: #171b24;
+    --d-surface-750: #1d222d;
+    --d-surface-700: #262c39;
+    --d-surface-600: #363e4e;
+
+    --d-text-strong: #f2f5fa;
+    --d-text-primary: #dde3ec;
+    --d-text-secondary: #9aa5b8;
+    --d-text-muted: #828d9f;
+
+    --d-line-subtle: rgba(255, 255, 255, 0.06);
+    --d-line: rgba(255, 255, 255, 0.10);
+    --d-line-strong: rgba(255, 255, 255, 0.18);
+
+    --d-scrim: rgba(6, 7, 10, 0.86);
+    --d-glass: rgba(6, 7, 10, 0.68);
+    --d-on-accent: #06070a;
+
+    --d-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --d-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --d-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+    /* --- Light surfaces --------------------------------------------------
+       Warm greys rather than pure white. A pure white page beside a dark
+       viewfinder makes the video look muddy by comparison, and is tiring at
+       the brightness a phone uses outdoors. */
+    --l-surface-950: #eef0f4;
+    --l-surface-900: #f8f9fb;
+    --l-surface-850: #f1f3f7;
+    --l-surface-800: #e8ebf1;
+    --l-surface-750: #dfe3ea;
+    --l-surface-700: #d3d8e2;
+    --l-surface-600: #b9c0ce;
+
+    --l-text-strong: #0d1017;
+    --l-text-primary: #1e2530;
+    --l-text-secondary: #4a5566;
+    --l-text-muted: #5e6a7d;
+
+    --l-line-subtle: rgba(13, 16, 23, 0.07);
+    --l-line: rgba(13, 16, 23, 0.13);
+    --l-line-strong: rgba(13, 16, 23, 0.24);
+
+    --l-scrim: rgba(233, 236, 241, 0.88);
+    --l-glass: rgba(255, 255, 255, 0.76);
+    --l-on-accent: #06070a;
+
+    --l-shadow-sm: 0 1px 2px rgba(13, 16, 23, 0.10);
+    --l-shadow-md: 0 8px 24px rgba(13, 16, 23, 0.12);
+    --l-shadow-lg: 0 24px 60px rgba(13, 16, 23, 0.16);
+
+    /* ==================================================================== */
+    /* Theme independent values                                             */
+    /* ==================================================================== */
+
+    /* --- Brand ------------------------------------------------------------
+       The accents are shared. Both are chosen to clear the contrast
+       requirement against either surface set, so the identity does not change
+       between themes. */
+    --cyan-300: #6feeff;
+    --cyan-400: #2ee0fb;
+    --cyan-500: #0fc4e4;
+    --cyan-600: #067f96;
+    --magenta-300: #ff8ac0;
+    --magenta-400: #ff4d9d;
+    --magenta-500: #ee2a85;
+    --magenta-600: #b8155f;
+
+    /* The chromatic split, used for the brand mark and every accent edge. */
+    --brand-gradient: linear-gradient(135deg, var(--cyan-400) 0%, var(--magenta-400) 100%);
+
+    /* --- Over the video ----------------------------------------------------
+       Interface drawn on top of the camera image keeps one appearance in both
+       themes. Its backdrop is the picture, not the page, and a light chip over
+       a bright frame is unreadable regardless of which theme is active. */
+    --video-glass: rgba(6, 7, 10, 0.68);
+    --video-scrim: rgba(6, 7, 10, 0.35);
+    --on-video: #f2f5fa;
+    --on-video-line: rgba(242, 245, 250, 0.55);
+
+    /* --- Status ----------------------------------------------------------- */
+    --record: #ff3b4e;
+    --record-glow: rgba(255, 59, 78, 0.45);
+    --success: #16a06a;
+    --warning: #b56a00;
+    --danger: #d63a3a;
+
+    /* --- Radii ------------------------------------------------------------ */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 26px;
+    --radius-pill: 999px;
+
+    /* --- Spacing scale ---------------------------------------------------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --space-8: 40px;
+    --space-9: 56px;
+
+    /* --- Typography ------------------------------------------------------- */
+    --font-display: 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --text-xs: 0.6875rem;
+    --text-sm: 0.8125rem;
+    --text-base: 0.9375rem;
+    --text-lg: 1.0625rem;
+    --text-xl: 1.375rem;
+    --text-2xl: 1.75rem;
+    --text-3xl: 2.25rem;
+
+    --leading-tight: 1.2;
+    --leading-normal: 1.55;
+
+    /* Letter spacing for the small capitalised labels used on controls. */
+    --tracking-caps: 0.08em;
+
+    /* --- Motion ------------------------------------------------------------ */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    --duration-fast: 140ms;
+    --duration-base: 240ms;
+    --duration-slow: 420ms;
+
+    /* --- Layering ---------------------------------------------------------- */
+    --layer-stage: 1;
+    --layer-viewfinder-ui: 10;
+    --layer-controls: 20;
+    --layer-tooltip: 40;
+    --layer-overlay: 60;
+
+    /* --- Layout ------------------------------------------------------------ */
+    --shell-max-width: 1240px;
+    --panel-width: 296px;
+
+    /* ==================================================================== */
+    /* Semantic tokens. Dark by default.                                    */
+    /* ==================================================================== */
+
+    --ink-950: var(--d-surface-950);
+    --ink-900: var(--d-surface-900);
+    --ink-850: var(--d-surface-850);
+    --ink-800: var(--d-surface-800);
+    --ink-750: var(--d-surface-750);
+    --ink-700: var(--d-surface-700);
+    --ink-600: var(--d-surface-600);
+
+    --text-strong: var(--d-text-strong);
+    --text-primary: var(--d-text-primary);
+    --text-secondary: var(--d-text-secondary);
+    --text-muted: var(--d-text-muted);
+
+    --line-subtle: var(--d-line-subtle);
+    --line: var(--d-line);
+    --line-strong: var(--d-line-strong);
+
+    --scrim: var(--d-scrim);
+    --glass: var(--d-glass);
+    --on-accent: var(--d-on-accent);
+
+    --accent-text: var(--cyan-300);
+
+    --shadow-sm: var(--d-shadow-sm);
+    --shadow-md: var(--d-shadow-md);
+    --shadow-lg: var(--d-shadow-lg);
+
+    color-scheme: dark;
+}
+
+/* ======================================================================== */
+/* Light theme.                                                             */
+/*                                                                          */
+/* The remapping appears twice because a media query and an attribute        */
+/* selector cannot be combined into one rule. Only the pointers are          */
+/* repeated; every colour value itself is still declared exactly once above. */
+/* ======================================================================== */
+
+:root[data-theme='light'] {
+    --ink-950: var(--l-surface-950);
+    --ink-900: var(--l-surface-900);
+    --ink-850: var(--l-surface-850);
+    --ink-800: var(--l-surface-800);
+    --ink-750: var(--l-surface-750);
+    --ink-700: var(--l-surface-700);
+    --ink-600: var(--l-surface-600);
+
+    --text-strong: var(--l-text-strong);
+    --text-primary: var(--l-text-primary);
+    --text-secondary: var(--l-text-secondary);
+    --text-muted: var(--l-text-muted);
+
+    --line-subtle: var(--l-line-subtle);
+    --line: var(--l-line);
+    --line-strong: var(--l-line-strong);
+
+    --scrim: var(--l-scrim);
+    --glass: var(--l-glass);
+    --on-accent: var(--l-on-accent);
+
+    /* The 400 weight accents are too pale to read as text on a light surface,
+       so the darker steps are used for anything that carries a word. */
+    --accent-text: var(--cyan-600);
+
+    --shadow-sm: var(--l-shadow-sm);
+    --shadow-md: var(--l-shadow-md);
+    --shadow-lg: var(--l-shadow-lg);
+
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) {
+        --ink-950: var(--l-surface-950);
+        --ink-900: var(--l-surface-900);
+        --ink-850: var(--l-surface-850);
+        --ink-800: var(--l-surface-800);
+        --ink-750: var(--l-surface-750);
+        --ink-700: var(--l-surface-700);
+        --ink-600: var(--l-surface-600);
+
+        --text-strong: var(--l-text-strong);
+        --text-primary: var(--l-text-primary);
+        --text-secondary: var(--l-text-secondary);
+        --text-muted: var(--l-text-muted);
+
+        --line-subtle: var(--l-line-subtle);
+        --line: var(--l-line);
+        --line-strong: var(--l-line-strong);
+
+        --scrim: var(--l-scrim);
+        --glass: var(--l-glass);
+        --on-accent: var(--l-on-accent);
+
+        --accent-text: var(--cyan-600);
+
+        --shadow-sm: var(--l-shadow-sm);
+        --shadow-md: var(--l-shadow-md);
+        --shadow-lg: var(--l-shadow-lg);
+
+        color-scheme: light;
+    }
+}
+
+/**
+ * Respect a stated preference for reduced motion.
+ *
+ * Interface transitions are removed. The visual effects themselves are not,
+ * because they are the content the user came to record rather than decoration
+ * applied to the interface, and removing them would leave nothing to record.
+ */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --duration-fast: 0ms;
+        --duration-base: 0ms;
+        --duration-slow: 0ms;
+    }
+}

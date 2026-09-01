@@ -1,0 +1,74 @@
+# File: .github/workflows/paper.yml
+# Author: Amey Thakur
+# Repository: https://github.com/Amey-Thakur/GESTURE-FX
+# License: MIT
+#
+# Compiles the preprint and fails if it does not build.
+#
+# A paper that no longer compiles is as broken as code that no longer runs, and
+# is far easier to leave broken, because nothing else in the repository depends
+# on it. This workflow removes that asymmetry: the LaTeX is verified on every
+# change to it, and the built PDF is attached to the run so a reader can fetch
+# the current version without a local TeX installation.
+
+name: Paper
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'paper/**'
+      - '.github/workflows/paper.yml'
+  pull_request:
+    paths:
+      - 'paper/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile the preprint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install Tectonic
+        run: |
+          set -euo pipefail
+          version=$(curl -fsSL https://api.github.com/repos/tectonic-typesetting/tectonic/releases/latest \
+            | grep -o '"browser_download_url": "[^"]*x86_64-unknown-linux-musl.tar.gz"' \
+            | head -1 | cut -d'"' -f4)
+          echo "Downloading $version"
+          curl -fsSL "$version" -o tectonic.tar.gz
+          tar -xzf tectonic.tar.gz
+          sudo mv tectonic /usr/local/bin/
+          tectonic --version
+
+      - name: Compile
+        working-directory: paper
+        run: tectonic -X compile main.tex --keep-logs
+
+      - name: Fail on an undefined citation or reference
+        working-directory: paper
+        run: |
+          if grep -qiE "Citation .* undefined|Reference .* undefined" main.log; then
+            echo 'The paper has undefined citations or references:'
+            grep -iE "Citation .* undefined|Reference .* undefined" main.log
+            exit 1
+          fi
+          echo 'Every citation and reference resolved.'
+
+      - name: Upload the PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: preprint
+          path: paper/main.pdf
+          if-no-files-found: error

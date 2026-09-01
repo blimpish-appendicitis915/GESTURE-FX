@@ -1,0 +1,924 @@
+<!doctype html>
+<!--
+  File: index.html
+  Author: Amey Thakur
+  GitHub: https://github.com/Amey-Thakur
+  Repository: https://github.com/Amey-Thakur/GESTURE-FX
+  Release Date: August 31 2026
+  License: MIT
+
+  Tech Stack: HTML5, CSS3, TypeScript (ES2022), WebGL 2, MediaPipe Tasks Vision
+
+  Description:
+  The application shell. The document is written once and never rebuilt: every
+  state change toggles the `hidden` attribute on a section that already exists,
+  so there is no markup generated from strings and no template layer.
+
+  The overlays are declared in the order they can appear, which is also the
+  order a first visit encounters them: guide, loading, permission, error,
+  review.
+-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#06070A">
+
+    <title>GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser</title>
+
+    <meta name="description"
+        content="Flip your hand and the recording glitches. GESTURE-FX detects hand gestures in real time and fires camera effects into the video as it records. Runs entirely in the browser with no server, no upload and no editing.">
+    <meta name="author" content="Amey Thakur">
+    <meta name="keywords"
+        content="gesture recognition, hand tracking, finger frame effect, hand gesture camera effects, cartoon filter, MediaPipe, WebGL, webcam video effects, MediaRecorder, browser computer vision, non-photorealistic rendering, glitch effect, client side">
+
+    <link rel="canonical" href="https://amey-thakur.github.io/GESTURE-FX/">
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="apple-touch-icon" href="./favicon.svg">
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- Social preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GESTURE-FX">
+    <meta property="og:title" content="GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser">
+    <meta property="og:description"
+        content="Flip your hand and the recording glitches. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
+    <meta property="og:url" content="https://amey-thakur.github.io/GESTURE-FX/">
+    <meta property="og:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="640">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser">
+    <meta name="twitter:description"
+        content="Flip your hand and the recording glitches. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
+    <meta name="twitter:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
+
+    <!--
+      Structured data. This is what lets a search engine and a language model
+      state what the project is, who wrote it, and that it costs nothing.
+    -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "GESTURE-FX",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any modern web browser",
+        "url": "https://amey-thakur.github.io/GESTURE-FX/",
+        "description": "A browser application that detects hand gestures in real time and fires camera effects into a video as it records, and that turns the rectangle made by two hands into a window showing the same scene redrawn as a cartoon, a comic, a pencil drawing, a screen print or pen and ink. Runs on the client with no server, no upload and no editing step.",
+        "featureList": [
+            "Two-hand finger frame with seven on-device drawing styles",
+            "Palm-flip detection on the exact frame of the flip",
+            "Effects composited into the recording, with no editing step",
+            "Optional voice control for starting and stopping a take",
+            "Optional face auto-framing",
+            "Optional restyle through a video model, using your own key"
+        ],
+        "author": {
+            "@type": "Person",
+            "name": "Amey Thakur",
+            "url": "https://github.com/Amey-Thakur",
+            "identifier": "https://orcid.org/0000-0001-5644-1575"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/Amey-Thakur/GESTURE-FX",
+        "isAccessibleForFree": true,
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+
+    <link rel="stylesheet" href="./styles/tokens.css">
+    <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/layout.css">
+    <link rel="stylesheet" href="./styles/controls.css">
+    <link rel="stylesheet" href="./styles/overlays.css">
+</head>
+
+<body>
+    <!-- ================================================================== -->
+    <!-- Application shell                                                  -->
+    <!-- ================================================================== -->
+    <div class="app">
+
+        <header class="masthead">
+            <a class="brand" href="https://github.com/Amey-Thakur/GESTURE-FX" target="_blank" rel="noopener"
+                data-tooltip="View the source on GitHub">
+                <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+                    <rect width="64" height="64" rx="14" fill="#0B0D12" />
+                    <g fill="none" stroke-width="3.5" stroke-linejoin="round">
+                        <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#2EE0FB"
+                            transform="translate(-3.5 -3.5)" />
+                        <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#FF4D9D"
+                            transform="translate(3.5 3.5)" />
+                        <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#F2F5FA" />
+                    </g>
+                </svg>
+                <span class="brand__name">GESTURE<span class="brand__accent">-FX</span></span>
+            </a>
+
+            <nav class="masthead__actions" aria-label="Application">
+                <button class="button button--icon button--quiet" data-action="open-guide"
+                    data-tooltip="How it works" aria-label="How it works">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.6" />
+                        <path d="M12 17h.01" />
+                    </svg>
+                </button>
+
+                <button class="button button--icon button--quiet" data-action="open-method"
+                    data-tooltip="The method behind it" aria-label="The method behind it">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19V7a2 2 0 0 1 2-2h5v14H6a2 2 0 0 0-2 2Z" />
+                        <path d="M20 19V7a2 2 0 0 0-2-2h-5v14h5a2 2 0 0 1 2 2Z" />
+                        <path d="M7.5 9h1.5M7.5 12h1.5M15 9h1.5M15 12h1.5" />
+                    </svg>
+                </button>
+
+                <button class="button button--icon button--quiet" data-action="open-settings"
+                    data-tooltip="Settings" aria-label="Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z" />
+                    </svg>
+                </button>
+
+                <button class="button button--icon button--quiet" data-action="share-app"
+                    data-tooltip="Share GESTURE-FX" aria-label="Share GESTURE-FX">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="18" cy="5" r="3" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="19" r="3" />
+                        <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+                    </svg>
+                </button>
+
+                <a class="button button--icon button--quiet" href="https://github.com/Amey-Thakur/GESTURE-FX"
+                    target="_blank" rel="noopener" data-tooltip="Source code on GitHub" aria-label="Source code on GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.4 6.8 9.7.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.4-3.4-1.4-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.3-1.1.6-1.4-2.2-.3-4.6-1.2-4.6-5.1 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9 9 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.8-4.6 5.1.4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10.2 10.2 0 0 0 22 12.3C22 6.6 17.5 2 12 2Z" />
+                    </svg>
+                </a>
+            </nav>
+        </header>
+
+        <!-- ============================================================== -->
+        <!-- Stage: the viewfinder and the gesture panel                    -->
+        <!-- ============================================================== -->
+        <main class="stage">
+            <div class="stage__inner">
+
+                <div class="stage__main">
+                    <div class="stage__viewport" data-role="viewport">
+                        <div class="viewfinder" data-role="viewfinder" data-recording="false">
+                            <canvas class="viewfinder__canvas" data-role="canvas"
+                                aria-label="Live camera preview with gesture effects"></canvas>
+
+                            <div class="viewfinder__frame" aria-hidden="true"></div>
+
+                            <div class="viewfinder__topbar">
+                                <span class="pill pill--recording" data-role="recording-pill" hidden>
+                                    <span class="pill__dot"></span>
+                                    <span class="tabular" data-role="timer">0:00</span>
+                                </span>
+
+                                <div class="viewfinder__status">
+                                    <span class="pill pill--frame" data-role="frame-pill" hidden>
+                                        <span class="pill__dot"></span>
+                                        <span>Frame open</span>
+                                    </span>
+
+                                    <span class="pill pill--tracking" data-role="tracking-pill" hidden>
+                                        <span class="pill__dot"></span>
+                                        <span data-role="tracking-label">Hand detected</span>
+                                    </span>
+
+                                    <span class="pill pill--armed" data-role="ai-pill" hidden>
+                                        <span class="pill__dot"></span>
+                                        <span>Raw take</span>
+                                    </span>
+
+                                    <span class="pill pill--listening" data-role="voice-pill" hidden>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                                            aria-hidden="true">
+                                            <rect x="9" y="3" width="6" height="11" rx="3" />
+                                            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                                        </svg>
+                                        <span>Listening</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="viewfinder__footer">
+                                <div class="toast" data-role="toast" data-visible="false" role="status" aria-live="polite">
+                                    <span class="toast__gesture" data-role="toast-gesture"></span>
+                                    <span data-role="toast-effect"></span>
+                                </div>
+                            </div>
+
+                            <div class="countdown" data-role="countdown" hidden>
+                                <span class="countdown__value" data-role="countdown-value">3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="strips">
+                        <div class="strip">
+                            <span class="strip__label" id="strip-look">Look</span>
+                            <div class="chip-strip" data-role="filter-group" role="radiogroup"
+                                aria-labelledby="strip-look" aria-label="Colour treatment"></div>
+                        </div>
+
+                        <div class="strip">
+                            <span class="strip__label" id="strip-frame">Frame</span>
+                            <div class="chip-strip" data-role="style-group" role="radiogroup"
+                                aria-labelledby="strip-frame" aria-label="Frame style"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel__backdrop" data-role="panel-backdrop" hidden></div>
+
+                <aside class="panel" data-role="panel" data-open="false" aria-label="Gestures">
+                    <div class="panel__heading">
+                        <h2 class="panel__title">Gestures</h2>
+                        <span class="panel__title" data-role="fps"></span>
+
+                        <button class="panel__close" data-action="close-gestures"
+                            aria-label="Close gestures">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                aria-hidden="true">
+                                <path d="M6 6l12 12M18 6L6 18" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="panel__list" data-role="gesture-list"></div>
+                </aside>
+
+            </div>
+        </main>
+
+        <!-- ============================================================== -->
+        <!-- Controls                                                       -->
+        <!-- ============================================================== -->
+        <div class="controls">
+            <div class="controls__group controls__group--start">
+                <div class="segmented" role="radiogroup" aria-label="Output shape" data-role="aspect-group"></div>
+
+                <button class="button button--compact" data-action="open-gestures"
+                    data-tooltip="Gestures and the effects they fire" aria-expanded="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11" />
+                        <path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11" />
+                        <path d="M15 11V6.5a1.5 1.5 0 0 1 3 0V13a7 7 0 0 1-7 7h-.5a6 6 0 0 1-5.2-3L3 13.5a1.6 1.6 0 0 1 2.6-1.8L7.5 14" />
+                        <path d="M9 11V8.5a1.5 1.5 0 0 0-3 0V13" />
+                    </svg>
+                    <span>Gestures</span>
+                </button>
+
+                <button class="button button--icon" data-action="switch-camera" data-tooltip="Switch camera"
+                    aria-label="Switch camera" hidden>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 7h3l1.6-2h8.8L18 7h3v12H3z" />
+                        <path d="M9.5 12.5 12 10l2.5 2.5" />
+                        <path d="M12 10v6" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="controls__group controls__group--centre">
+                <button class="record" data-role="record" data-recording="false" data-tooltip="Start recording"
+                    aria-label="Start recording" disabled>
+                    <span class="record__shape"></span>
+                </button>
+            </div>
+
+            <div class="controls__group controls__group--end">
+                <button class="button button--icon" data-action="toggle-microphone" aria-pressed="true"
+                    data-tooltip="Sound is being recorded" aria-label="Sound is being recorded">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                        <rect x="9" y="3" width="6" height="11" rx="3" />
+                        <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                    </svg>
+                </button>
+
+                <button class="button button--icon" data-action="toggle-restyle" aria-pressed="false"
+                    data-tooltip="Record raw for a Gemini restyle" aria-label="Record raw for a Gemini restyle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3.5 13.6 8 18 9.6 13.6 11.2 12 15.6 10.4 11.2 6 9.6 10.4 8Z" />
+                        <path d="M18.5 15.5 19.2 17.3 21 18 19.2 18.7 18.5 20.5 17.8 18.7 16 18 17.8 17.3Z" />
+                        <path d="M5.5 14.5 6 16 7.5 16.5 6 17 5.5 18.5 5 17 3.5 16.5 5 16Z" />
+                    </svg>
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- Overlays                                                           -->
+    <!-- ================================================================== -->
+
+    <!-- Intro guide, shown on a first visit and from the masthead thereafter -->
+    <section class="overlay" data-role="overlay-guide" aria-labelledby="guide-title" hidden>
+        <div class="card card--wide" role="dialog" aria-modal="true">
+
+            <!--
+              The finger frame is the first thing shown, not the third. It is
+              what this application is for, and a guide that opens with a
+              permission prompt teaches the permission prompt.
+            -->
+            <figure class="demo">
+                <svg class="demo__art" viewBox="0 0 360 224" role="img"
+                    aria-labelledby="demo-title demo-desc">
+                    <title id="demo-title">Two hands framing a subject</title>
+                    <desc id="demo-desc">
+                        Both index fingers point up and both thumbs reach across. Inside
+                        the rectangle the four fingertips make, the picture is redrawn as
+                        a cartoon; outside it, the camera image continues unchanged.
+                    </desc>
+
+                    <defs>
+                        <clipPath id="demo-clip">
+                            <path d="M126 40 L234 40 L222 136 L138 136 Z" />
+                        </clipPath>
+                    </defs>
+
+                    <!-- The subject, as the camera sees it -->
+                    <g class="demo__subject">
+                        <path d="M118 214 a62 58 0 0 1 124 0 Z" />
+                        <circle cx="180" cy="86" r="38" />
+                    </g>
+
+                    <!-- The same subject inside the window, redrawn -->
+                    <g clip-path="url(#demo-clip)">
+                        <g class="demo__subject demo__subject--drawn">
+                            <path d="M118 214 a62 58 0 0 1 124 0 Z" />
+                            <circle cx="180" cy="86" r="38" />
+                        </g>
+                        <g class="demo__face">
+                            <circle cx="167" cy="80" r="3.6" />
+                            <circle cx="193" cy="80" r="3.6" />
+                            <path d="M169 102 q11 8 22 0" />
+                        </g>
+                    </g>
+
+                    <!-- The window the four fingertips define -->
+                    <path class="demo__window" d="M126 40 L234 40 L222 136 L138 136 Z" />
+
+                    <!-- Left hand -->
+                    <g class="demo__hand">
+                        <path class="demo__palm" d="M74 214 v-42 a30 30 0 0 1 30 -30 h14 a12 12 0 0 1 0 24 h-8" />
+                        <path class="demo__finger" d="M112 158 L126 46" />
+                        <path class="demo__finger" d="M112 168 L138 136" />
+                        <path class="demo__curl" d="M104 176 h18 M104 192 h16 M104 208 h13" />
+                    </g>
+
+                    <!-- Right hand, mirrored -->
+                    <g class="demo__hand">
+                        <path class="demo__palm" d="M286 214 v-42 a30 30 0 0 0 -30 -30 h-14 a12 12 0 0 0 0 24 h8" />
+                        <path class="demo__finger" d="M248 158 L234 46" />
+                        <path class="demo__finger" d="M248 168 L222 136" />
+                        <path class="demo__curl" d="M256 176 h-18 M256 192 h-16 M256 208 h-13" />
+                    </g>
+
+                    <!-- The tracked fingertips, in the colour the shader draws them -->
+                    <g class="demo__corner">
+                        <circle cx="126" cy="40" r="6" />
+                        <circle cx="234" cy="40" r="6" />
+                        <circle cx="222" cy="136" r="6" />
+                        <circle cx="138" cy="136" r="6" />
+                    </g>
+                </svg>
+                </svg>
+
+                <figcaption class="demo__caption">
+                    Both index fingers up. Both thumbs across. The picture inside
+                    turns into a cartoon.
+                </figcaption>
+            </figure>
+
+            <h1 class="card__title" id="guide-title">Frame a shot with your hands</h1>
+            <p class="card__body">
+                Everything happens as you record, on this device, so the video is
+                finished the moment you stop.
+            </p>
+
+            <div class="guide__steps">
+                <div class="guide__step guide__step--feature">
+                    <span class="guide__index">1</span>
+                    <span class="guide__text">
+                        <strong>Make the rectangle</strong>
+                        Hold both hands up, index fingers pointing at the ceiling and
+                        thumbs reaching toward each other. Whatever is inside the
+                        rectangle is redrawn. Seven styles, chosen in settings, from the strip, or by voice.
+                    </span>
+                </div>
+
+                <div class="guide__step">
+                    <span class="guide__index">2</span>
+                    <span class="guide__text">
+                        <strong>Say “record”, or press the button</strong>
+                        Voice control is off until you switch it on in settings. With
+                        it on, “record” starts a take and “stop” ends one, so both
+                        hands stay in shot.
+                    </span>
+                </div>
+
+                <div class="guide__step">
+                    <span class="guide__index">3</span>
+                    <span class="guide__text">
+                        <strong>Flip an open hand mid-take</strong>
+                        The picture tears the instant your palm turns. Four more
+                        gestures are listed beside the viewfinder, and each one can be
+                        bound to a different effect.
+                    </span>
+                </div>
+
+                <div class="guide__step">
+                    <span class="guide__index">4</span>
+                    <span class="guide__text">
+                        <strong>Stop, then save</strong>
+                        The effects are already in the file. There is no export step
+                        and nothing to edit.
+                    </span>
+                </div>
+            </div>
+
+            <p class="guide__privacy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6z" />
+                    <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span>
+                    Your camera never leaves this device. There is no server, no upload and no
+                    analytics. Recordings are held in the page and are gone when you close the
+                    tab. Two features are exceptions, voice control and the optional restyle, and
+                    both are off unless you turn them on.
+                </span>
+            </p>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="dismiss-guide">Start</button>
+                <button class="button" data-action="open-method">How it works</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="overlay" data-role="overlay-settings" aria-labelledby="settings-title" hidden>
+        <div class="card card--wide" role="dialog" aria-modal="true">
+            <h1 class="card__title" id="settings-title">Settings</h1>
+            <p class="card__body">
+                Every option here changes how the application behaves and is remembered on this
+                device.
+            </p>
+
+            <div class="settings" data-role="settings-list"></div>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="close-settings">Done</button>
+            </div>
+
+            <p class="card__footnote">
+                Built by
+                <a class="link" href="https://github.com/Amey-Thakur" target="_blank"
+                    rel="noopener">Amey Thakur</a>.
+                Open source under the MIT licence.
+            </p>
+        </div>
+    </section>
+
+    <!-- The method: what the application computes, and why -->
+    <section class="overlay" data-role="overlay-method" aria-labelledby="method-title" hidden>
+        <div class="card card--reading" role="dialog" aria-modal="true">
+            <h1 class="card__title" id="method-title">How it works</h1>
+            <p class="card__body">
+                Six steps run on every frame, all of them on this device. Each one is
+                a piece of arithmetic small enough to state exactly.
+            </p>
+
+            <ol class="method">
+
+                <!-- 1 -->
+                <li class="method__step">
+                    <h2 class="method__title">Twenty-one points per hand</h2>
+                    <p class="method__text">
+                        A convolutional model returns a landmark for every joint, at
+                        24 Hz. Everything after this reads those coordinates and never
+                        the picture, which is why a gesture is recognised the same way
+                        in any light.
+                    </p>
+
+                    <svg class="method__art" viewBox="0 0 200 110" role="img" aria-label="A hand skeleton of joints and bones">
+                        <g class="method__bone">
+                            <path d="M100 96 L74 62 M100 96 L90 52 M100 96 L106 50 M100 96 L120 56 M100 96 L134 76" />
+                            <path d="M74 62 L64 48 L58 36 M90 52 L86 34 L84 20 M106 50 L108 30 L110 16 M120 56 L126 38 L130 26 M134 76 L148 68 L158 62" />
+                        </g>
+                        <g class="method__joint">
+                            <circle cx="100" cy="96" r="4" />
+                            <circle cx="74" cy="62" r="3" /><circle cx="90" cy="52" r="3" />
+                            <circle cx="106" cy="50" r="3" /><circle cx="120" cy="56" r="3" />
+                            <circle cx="134" cy="76" r="3" /><circle cx="64" cy="48" r="3" />
+                            <circle cx="58" cy="36" r="3" /><circle cx="86" cy="34" r="3" />
+                            <circle cx="84" cy="20" r="3" /><circle cx="108" cy="30" r="3" />
+                            <circle cx="110" cy="16" r="3" /><circle cx="126" cy="38" r="3" />
+                            <circle cx="130" cy="26" r="3" /><circle cx="148" cy="68" r="3" />
+                            <circle cx="158" cy="62" r="3" />
+                        </g>
+                    </svg>
+                </li>
+
+                <!-- 2 -->
+                <li class="method__step">
+                    <h2 class="method__title">Which side of the palm faces the lens</h2>
+                    <p class="method__text">
+                        Take two vectors across the palm and cross them. The result
+                        points out of the back of the hand, and the sign of its
+                        component toward the camera says which way the hand is turned.
+                    </p>
+
+                    <p class="formula">
+                        s = (<em>v</em><sub>1</sub> &times; <em>v</em><sub>2</sub>)<sub>z</sub>
+                        &nbsp;/&nbsp; |<em>v</em><sub>1</sub>| |<em>v</em><sub>2</sub>|
+                        &nbsp;&nbsp;=&nbsp;&nbsp; k(&theta;) cos &theta;
+                    </p>
+
+                    <p class="method__text method__text--aside">
+                        The factor k is positive for any hand that is not folded flat,
+                        so s and cos&nbsp;&theta; change sign together. A flip is a sign
+                        change, which is exact: it does not depend on the size of the
+                        hand, its distance, or how it is rotated in the picture.
+                    </p>
+                </li>
+
+                <!-- 3 -->
+                <li class="method__step">
+                    <h2 class="method__title">The window between four fingertips</h2>
+                    <p class="method__text">
+                        Two index tips and two thumb tips, kept in anatomical order, are
+                        the corners of a quadrilateral. A pixel is inside it when a ray
+                        cast from that pixel crosses the boundary an odd number of times.
+                    </p>
+
+                    <svg class="method__art" viewBox="0 0 220 110" role="img"
+                        aria-label="A ray crossing a quadrilateral twice outside and once inside">
+                        <path class="method__shape" d="M42 22 L172 22 L150 88 L64 88 Z" />
+                        <path class="method__ray" d="M8 55 H210" />
+                        <g class="method__joint">
+                            <circle cx="42" cy="22" r="4" /><circle cx="172" cy="22" r="4" />
+                            <circle cx="150" cy="88" r="4" /><circle cx="64" cy="88" r="4" />
+                        </g>
+                        <g class="method__cross">
+                            <circle cx="53" cy="55" r="4" /><circle cx="161" cy="55" r="4" />
+                        </g>
+                    </svg>
+
+                    <p class="method__text method__text--aside">
+                        Counting crossings rather than splitting the shape into triangles
+                        is what keeps this correct when the hands cross. The quad then
+                        folds into two lobes, and the count still gives exactly those.
+                    </p>
+                </li>
+
+                <!-- 4 -->
+                <li class="method__step">
+                    <h2 class="method__title">Holding the window still</h2>
+                    <p class="method__text">
+                        Landmarks move by a percent of the frame while the hands do not.
+                        Each corner is smoothed toward its measurement by a coefficient
+                        that is written per frame at 60&nbsp;Hz and then rescaled to the
+                        interval that actually elapsed.
+                    </p>
+
+                    <p class="formula">
+                        &alpha; = 1 &minus; (1 &minus; k)<sup>&Delta;t / 16.7</sup>
+                    </p>
+
+                    <p class="method__text method__text--aside">
+                        Without the exponent the window settles at a different speed on
+                        every device. The coefficient k itself rises with the speed of
+                        the hand, so a still frame is smoothed hard and a moving one is
+                        barely smoothed at all.
+                    </p>
+                </li>
+
+                <!-- 5 -->
+                <li class="method__step">
+                    <h2 class="method__title">Redrawing what is inside</h2>
+                    <p class="method__text">
+                        A cartoon is three things at once: flat interiors, sharp
+                        boundaries, and a line. Each is computed separately and then
+                        composed, after the white-box decomposition of cartoon
+                        representation.
+                    </p>
+
+                    <dl class="method__parts">
+                        <dt>Surface</dt>
+                        <dd>
+                            Three passes of an edge-preserving filter collapse each region
+                            onto its own colour. A neighbour is weighted by how near it is
+                            and by how similar it is, so smoothing stops at a boundary.
+                            <span class="formula formula--inline">
+                                w = e<sup>&minus;|&Delta;x|&sup2;/2&sigma;<sub>s</sub>&sup2;</sup>
+                                &middot; e<sup>&minus;|&Delta;c|&sup2;/2&sigma;<sub>r</sub>&sup2;</sup>
+                            </span>
+                        </dd>
+
+                        <dt>Structure</dt>
+                        <dd>
+                            Tone is rounded to a band and the colour is rescaled to match,
+                            which flattens the shading and holds the hue. Rounding the red,
+                            green and blue channels separately, which is what a posterise
+                            does, turns skin green.
+                            <span class="formula formula--inline">
+                                Q(L) = q + (&Delta;q/2) tanh(&phi;(L &minus; q)/&Delta;q)
+                            </span>
+                        </dd>
+
+                        <dt>Texture</dt>
+                        <dd>
+                            The line is where a difference of two Gaussians changes sign.
+                            Equal weights make it exactly zero across any flat region, so
+                            one threshold draws the same line on a dark coat and a lit face.
+                            <span class="formula formula--inline">
+                                D = G<sub>&sigma;</sub> &minus; G<sub>1.6&sigma;</sub>,
+                                &nbsp; ink where D &lt; &epsilon;
+                            </span>
+                        </dd>
+                    </dl>
+                </li>
+
+                <!-- 6 -->
+                <li class="method__step">
+                    <h2 class="method__title">The effects are recorded, not added later</h2>
+                    <p class="method__text">
+                        The canvas the effects are drawn on is the canvas that is
+                        captured. The recorder reads that surface rather than the camera,
+                        so what lands in the file is what you saw, already finished.
+                    </p>
+
+                    <svg class="method__art" viewBox="0 0 300 68" role="img"
+                        aria-label="Camera to shader to canvas to recorded file">
+                        <g class="method__flow">
+                            <rect x="4" y="18" width="60" height="32" rx="8" />
+                            <rect x="88" y="18" width="60" height="32" rx="8" />
+                            <rect x="172" y="18" width="60" height="32" rx="8" />
+                            <rect x="252" y="18" width="44" height="32" rx="8" />
+                            <path d="M68 34 h16 M152 34 h16 M236 34 h12" />
+                        </g>
+                        <g class="method__flowLabel">
+                            <text x="34" y="38">camera</text>
+                            <text x="118" y="38">shader</text>
+                            <text x="202" y="38">canvas</text>
+                            <text x="274" y="38">file</text>
+                        </g>
+                    </svg>
+                </li>
+            </ol>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="close-method">Done</button>
+                <a class="button" href="https://github.com/Amey-Thakur/GESTURE-FX" target="_blank"
+                    rel="noopener">Read the source</a>
+            </div>
+
+            <p class="card__footnote">
+                Every constant above is derived rather than tuned, and the reasoning for
+                each sits beside it in the source. The detector's accuracy is
+                <a class="link" href="./evaluation.html">measured, not asserted</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- The optional restyle. The only part of the application that is not local -->
+    <section class="overlay" data-role="overlay-restyle" aria-labelledby="restyle-title" hidden>
+        <div class="card card--wide" role="dialog" aria-modal="true">
+            <h1 class="card__title" id="restyle-title">Restyle with Gemini</h1>
+            <p class="card__body">
+                A video model redraws the whole take, and the window your hands made
+                reveals it. Everything else here runs on your device. This does not.
+            </p>
+
+            <div class="notice">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v5M12 16.2h.01" />
+                </svg>
+                <span>
+                    Your recording is uploaded to Google and generated against
+                    <strong>your own key</strong>, so it is billed to you and takes a few
+                    minutes. Nothing is sent until you press Generate.
+                </span>
+            </div>
+
+            <!-- The key -->
+            <div class="field" data-role="restyle-key-entry">
+                <label class="field__label" for="restyle-key">Your Gemini API key</label>
+                <p class="field__hint">
+                    Held in this tab and sent only to Google. It is never written to this
+                    repository, a log, or anywhere else.
+                    <a class="link" data-role="restyle-key-link" href="https://aistudio.google.com/apikey"
+                        target="_blank" rel="noopener">Get a key</a>.
+                </p>
+
+                <div class="field__row">
+                    <input class="input" id="restyle-key" type="password" inputmode="text"
+                        autocomplete="off" autocapitalize="off" spellcheck="false"
+                        placeholder="Paste your key" data-role="restyle-key">
+                    <button class="button" data-action="save-key">Save</button>
+                </div>
+
+                <label class="checkbox">
+                    <input type="checkbox" data-role="restyle-remember">
+                    <span>Remember on this device. Leave this off on a shared machine.</span>
+                </label>
+            </div>
+
+            <div class="field field--row" data-role="restyle-key-loaded" hidden>
+                <span class="field__text">
+                    <span class="field__label">Key loaded</span>
+                    <span class="field__hint" data-role="restyle-key-state"></span>
+                </span>
+                <button class="button button--compact" data-action="forget-key">Forget</button>
+            </div>
+
+            <!-- The look -->
+            <div class="field">
+                <span class="field__label" id="restyle-style-label">Look</span>
+                <p class="field__hint">
+                    Every prompt carries the same alignment constraint, which is what keeps
+                    the generated frame under the window instead of beside it.
+                </p>
+                <div class="chips" role="radiogroup" aria-labelledby="restyle-style-label"
+                    data-role="restyle-styles"></div>
+                <textarea class="input input--area" rows="3" data-role="restyle-custom"
+                    aria-label="Describe the look you want" placeholder="Describe the look you want"
+                    hidden></textarea>
+            </div>
+
+            <details class="advanced">
+                <summary class="advanced__summary">Model</summary>
+                <p class="field__hint">
+                    A preview model, so its name changes. If generation returns a 404, the
+                    current name is in Google’s documentation.
+                </p>
+                <input class="input" data-role="restyle-model" autocomplete="off" spellcheck="false"
+                    aria-label="Model name">
+            </details>
+
+            <div class="progress" data-role="restyle-progress" hidden>
+                <div class="loader__track">
+                    <div class="loader__fill" data-role="restyle-fill" data-indeterminate="true"></div>
+                </div>
+                <p class="progress__label" data-role="restyle-status" role="status" aria-live="polite"></p>
+            </div>
+
+            <p class="card__remedy" data-role="restyle-error" hidden></p>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="generate">Generate</button>
+                <button class="button" data-action="cancel-generate" hidden>Cancel</button>
+                <button class="button" data-action="download-generated"
+                    data-tooltip="Save the model's output on its own, without the window"
+                    hidden>Save the generated take</button>
+                <button class="button" data-action="close-restyle">Close</button>
+            </div>
+
+            <p class="card__footnote" data-role="restyle-footnote"></p>
+        </div>
+    </section>
+
+    <!-- Loading the tracking runtime and model -->
+    <section class="overlay" data-role="overlay-loading" aria-labelledby="loading-title" hidden>
+        <div class="card" role="status" aria-live="polite">
+            <div class="card__mark">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" aria-hidden="true">
+                    <path d="M12 3a9 9 0 1 0 9 9" />
+                </svg>
+            </div>
+
+            <h1 class="card__title" id="loading-title">Preparing hand tracking</h1>
+            <p class="card__body" data-role="loading-detail">
+                The tracking model is downloaded once and then cached by your browser.
+            </p>
+
+            <div class="loader">
+                <div class="loader__track">
+                    <div class="loader__fill" data-role="loading-fill" data-indeterminate="true"></div>
+                </div>
+                <div class="loader__label">
+                    <span data-role="loading-stage">Starting</span>
+                    <span class="tabular" data-role="loading-percent"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Camera permission -->
+    <section class="overlay" data-role="overlay-permission" aria-labelledby="permission-title" hidden>
+        <div class="card" role="dialog" aria-modal="true">
+            <div class="card__mark">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 7h3l1.6-2h8.8L18 7h3v12H3z" />
+                    <circle cx="12" cy="13" r="3.5" />
+                </svg>
+            </div>
+
+            <h1 class="card__title" id="permission-title">Camera access</h1>
+            <p class="card__body">
+                The camera is needed to track your hand and to record. The video is processed on this
+                device and is never sent anywhere.
+            </p>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="request-camera">Allow camera</button>
+            </div>
+
+            <p class="card__footnote">Your browser will ask for permission next.</p>
+        </div>
+    </section>
+
+    <!-- Errors -->
+    <section class="overlay" data-role="overlay-error" aria-labelledby="error-title" hidden>
+        <div class="card" role="alertdialog" aria-modal="true">
+            <div class="card__mark card__mark--danger">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" aria-hidden="true">
+                    <path d="M12 8v5" />
+                    <path d="M12 16.5h.01" />
+                    <path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                </svg>
+            </div>
+
+            <h1 class="card__title" id="error-title" data-role="error-title">Something went wrong</h1>
+            <p class="card__body" data-role="error-message"></p>
+            <p class="card__remedy" data-role="error-remedy"></p>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="retry">Try again</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Review and export -->
+    <section class="overlay" data-role="overlay-review" aria-labelledby="review-title" hidden>
+        <div class="card card--wide" role="dialog" aria-modal="true">
+            <h1 class="card__title" id="review-title">Your recording</h1>
+
+            <video class="review__video" data-role="review-video" controls playsinline></video>
+
+            <div class="review__meta">
+                <span data-role="review-duration"></span>
+                <span data-role="review-size"></span>
+                <span data-role="review-format"></span>
+            </div>
+
+            <div class="card__actions">
+                <button class="button button--primary" data-action="download"
+                    data-tooltip="Save the file to this device">Download</button>
+                <button class="button" data-action="share" data-tooltip="Send to another app or your photos"
+                    hidden>Share</button>
+                <button class="button" data-action="open-restyle" data-tooltip="Send this take to Gemini and show it through the window"
+                    hidden>Restyle</button>
+                <button class="button" data-action="record-again">Record again</button>
+            </div>
+
+            <p class="card__footnote">
+                This file is held in the page only. Closing the tab discards it.
+            </p>
+        </div>
+    </section>
+
+    <!-- The single shared tooltip, positioned in script -->
+    <div class="tooltip" data-role="tooltip" role="tooltip" data-visible="false" hidden></div>
+
+    <script type="module" src="./scripts/main.ts"></script>
+</body>
+
+</html>

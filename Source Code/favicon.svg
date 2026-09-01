@@ -1,0 +1,23 @@
+<!--
+  File: favicon.svg
+  Author: Amey Thakur
+  GitHub: https://github.com/Amey-Thakur
+  Repository: https://github.com/Amey-Thakur/GESTURE-FX
+  Release Date: August 31 2026
+  License: MIT
+
+  Tech Stack: SVG
+
+  Description:
+  The application mark: a viewfinder frame separated into its colour channels.
+  It is a literal picture of what the software does, and it is legible at 16px
+  because it resolves to three coloured strokes rather than to detail.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GESTURE-FX">
+  <rect width="64" height="64" rx="14" fill="#06070A"/>
+  <g fill="none" stroke-width="3.5" stroke-linejoin="round">
+    <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#2EE0FB" transform="translate(-3.5 -3.5)"/>
+    <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#FF4D9D" transform="translate(3.5 3.5)"/>
+    <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#F2F5FA"/>
+  </g>
+</svg>

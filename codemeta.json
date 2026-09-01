@@ -1,0 +1,99 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "GESTURE-FX",
+  "name": "GESTURE-FX: Gesture-Triggered Camera Effects in the Browser",
+  "description": "A browser application that recognises hand gestures in a live camera feed and composites a visual effect onto the video at the instant the gesture occurs, producing a finished recording that requires no editing. It introduces a geometric palm flip detector based on the winding order of the projected palm triangle, which identifies the exact frame of the gesture and is invariant to mirroring, hand scale and handedness without any calibration or training data. Detection, stylisation and recording run entirely on the client, with no server and no upload. Two auxiliary features are exceptions and are disabled by default: spoken command recognition, which uses the browser's own speech interface, and an optional delegated restyle, which sends one recording to a hosted model against a key the user supplies.",
+  "codeRepository": "https://github.com/Amey-Thakur/GESTURE-FX",
+  "url": "https://amey-thakur.github.io/GESTURE-FX/",
+  "issueTracker": "https://github.com/Amey-Thakur/GESTURE-FX/issues",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Amey",
+      "familyName": "Thakur",
+      "@id": "https://orcid.org/0000-0001-5644-1575",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "University of Mumbai"
+      }
+    }
+  ],
+  "maintainer": {
+    "@type": "Person",
+    "givenName": "Amey",
+    "familyName": "Thakur",
+    "@id": "https://orcid.org/0000-0001-5644-1575"
+  },
+  "copyrightHolder": {
+    "@type": "Person",
+    "givenName": "Amey",
+    "familyName": "Thakur"
+  },
+  "license": "https://spdx.org/licenses/MIT",
+  "version": "1.0.0",
+  "softwareVersion": "1.0.0",
+  "dateCreated": "2026-08-31",
+  "datePublished": "2026-09-01",
+  "dateModified": "2026-09-01",
+  "developmentStatus": "active",
+  "programmingLanguage": [
+    {
+      "@type": "ComputerLanguage",
+      "name": "TypeScript"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "GLSL ES 3.00"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "CSS"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "HTML"
+    }
+  ],
+  "runtimePlatform": [
+    "Web browser with WebGL 2 and WebAssembly"
+  ],
+  "operatingSystem": [
+    "Any"
+  ],
+  "softwareRequirements": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "@mediapipe/tasks-vision",
+      "name": "MediaPipe Tasks Vision",
+      "version": "1.0.1",
+      "url": "https://www.npmjs.com/package/@mediapipe/tasks-vision"
+    }
+  ],
+  "applicationCategory": "Computer Vision",
+  "applicationSubCategory": "Real-time gesture recognition and video effects",
+  "keywords": [
+    "gesture recognition",
+    "hand tracking",
+    "hand gesture recognition",
+    "human computer interaction",
+    "real-time video processing",
+    "computer vision",
+    "WebGL",
+    "MediaPipe",
+    "MediaRecorder",
+    "client-side computing",
+    "privacy preserving",
+    "edge inference",
+    "web application",
+    "TypeScript"
+  ],
+  "readme": "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/README.md",
+  "isAccessibleForFree": true,
+  "relatedLink": [
+    "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/SPECIFICATION.md",
+    "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/GESTURES.md",
+    "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/EFFECTS.md",
+    "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/BROWSER-SUPPORT.md"
+  ]
+}

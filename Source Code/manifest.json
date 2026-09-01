@@ -1,0 +1,20 @@
+{
+  "name": "GESTURE-FX",
+  "short_name": "GESTURE-FX",
+  "description": "Gesture-triggered camera effects in the browser. Flip your hand and the recording glitches, with no server, no upload and no manual editing.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#06070A",
+  "theme_color": "#06070A",
+  "categories": ["photo", "video", "utilities"],
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

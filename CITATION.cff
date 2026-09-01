@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+title: >-
+  GESTURE-FX: Gesture-Triggered Camera Effects in the Browser
+message: >-
+  If you use this software or the gesture detection method it introduces, please
+  cite it using the metadata in this file.
+type: software
+
+authors:
+  - given-names: Amey
+    family-names: Thakur
+    orcid: 'https://orcid.org/0000-0001-5644-1575'
+    affiliation: University of Mumbai
+
+repository-code: 'https://github.com/Amey-Thakur/GESTURE-FX'
+url: 'https://amey-thakur.github.io/GESTURE-FX/'
+
+abstract: >-
+  GESTURE-FX is a browser application that recognises hand gestures in a live
+  camera feed and composites a visual effect onto the video at the instant the
+  gesture occurs, producing a finished recording that requires no editing.
+
+  It introduces a geometric method for detecting a palm flip that requires no
+  trained classifier. The two dimensional cross product of the two palm edges,
+  taken at the wrist and normalised by their lengths, is the sine of the angle
+  between those edges as projected onto the image, signed by the winding order of
+  the triangle they span. Rotating a hand past edge-on reverses that winding and
+  drives the magnitude to zero, so a flip is a zero crossing of a single scalar
+  and the crossing identifies the exact frame of the gesture. The method is
+  provably invariant to image mirroring, to hand scale and to handedness, and
+  requires no calibration or training data.
+
+  Detection, stylisation and recording run entirely on the client. Landmark
+  inference is decoupled from rendering, so effect playback is independent of
+  tracking throughput, and the recorder captures the composited canvas so the
+  effect is present in the exported file as pixels. Two auxiliary features are
+  exceptions and are disabled by default: spoken command recognition, which uses
+  the browser's own speech interface, and an optional delegated restyle, which
+  sends one recording to a hosted model against a key the user supplies.
+
+keywords:
+  - gesture recognition
+  - hand tracking
+  - human computer interaction
+  - real-time video processing
+  - computer vision
+  - WebGL
+  - MediaPipe
+  - client-side computing
+  - privacy preserving
+  - web application
+
+license: MIT
+version: 1.0.0
+date-released: '2026-09-01'

@@ -1,0 +1,390 @@
+# Gesture Detection
+
+**Repository**: <https://github.com/Amey-Thakur/GESTURE-FX>
+**Author**: [Amey Thakur](https://github.com/Amey-Thakur)
+**Licence**: MIT
+
+How each gesture is recognised, why the method was chosen, and how to add one.
+
+---
+
+## Table of contents
+
+1. [The feature layer](#1-the-feature-layer)
+2. [The palm flip](#2-the-palm-flip)
+3. [The other four detectors](#3-the-other-four-detectors)
+4. [Handling the hard cases](#4-handling-the-hard-cases)
+5. [Adding a gesture](#5-adding-a-gesture)
+6. [Tuning](#6-tuning)
+
+---
+
+## 1. The feature layer
+
+MediaPipe returns 21 landmarks per hand in normalised image coordinates.
+Detectors never read those landmarks. They read the descriptors that
+`tracking/features.ts` derives from them.
+
+The boundary exists because of one decision: **every measurement is divided by
+hand span**, the distance from the wrist to the middle knuckle.
+
+Working in span units instead of image units removes three variables at once.
+A child's hand and an adult's hand produce the same numbers. A hand at arm's
+length and a hand near the lens produce the same numbers. A 480p stream and a
+1080p stream produce the same numbers. A threshold tuned once therefore holds
+across users and devices, and the project contains no calibration step.
+
+Span is measured across the palm rather than to a fingertip because it stays
+constant while the fingers move.
+
+| Descriptor | Meaning |
+|-----------|---------|
+| `palmSign` | Signed palm orientation in [-1, 1]. Section 2 |
+| `span` | Wrist to middle knuckle. The unit for everything else |
+| `centre` | Palm centroid, for motion |
+| `angle` | In-plane rotation |
+| `extension` | Per finger, tip distance over span |
+| `extendedCount` | How many fingers are extended |
+| `spread` | Fingertip separation over span |
+| `coverage` | Fraction of the frame the hand occupies |
+
+Finger extension is measured from the wrist, except for the thumb, which is
+measured from the index knuckle. The thumb folds across the palm rather than
+toward the wrist, so its wrist distance barely changes between open and closed.
+
+The extended and curled thresholds are deliberately separated, at 0.85 and 0.70.
+The gap is dead space: a pose is recognised only when it is unambiguous, which
+is what stops a hand hovering at the boundary from flickering between states.
+
+---
+
+## 2. The palm flip
+
+### 2.1 The problem
+
+Detect a hand rotating about its own long axis so the face presented to the
+camera changes, and report **the exact frame** on which it happened.
+
+The second half is the hard part. An effect that fires 200 ms after the flip
+does not read as caused by it.
+
+### 2.2 The derivation
+
+Take three landmarks:
+
+- `P0` the wrist
+- `P5` the index knuckle
+- `P17` the little finger knuckle
+
+These span the palm. Form the two edge vectors and take their two dimensional
+cross product, normalised by their lengths:
+
+```
+v1 = P5  − P0
+v2 = P17 − P0
+
+palmSign = (v1.x · v2.y − v1.y · v2.x) / (|v1| · |v2|)
+```
+
+The numerator is twice the signed area of the triangle. Dividing by the two
+edge lengths turns it into **the sine of the angle between the edges as
+projected onto the image**, bounded to [-1, 1].
+
+### 2.3 The two properties
+
+**The sign is the winding order in projection.** Traversing wrist to index
+knuckle to little finger knuckle goes one way around when the palm faces the
+camera and the other way when the back does. Rotating past edge-on reverses the
+winding, so the scalar changes sign.
+
+**The magnitude collapses to zero at the same instant.** An edge-on palm
+projects to a line. A line has no area, so the triangle has none.
+
+### 2.4 Stating it exactly
+
+Let the hand rotate about its own long axis by `theta`, and write the un-rotated
+edges as `v1 = (a, b)` and `v2 = (c, d)`. Orthographic projection scales only the
+component along the axis of rotation, so:
+
+```
+cross(v1, v2) = a·cos(theta)·d - b·c·cos(theta) = (ad - bc)·cos(theta)
+
+              (ad - bc)
+s(theta)  =  ----------------  ·  cos(theta)   =   k(theta) · cos(theta)
+              |v1| · |v2|
+```
+
+`ad - bc` is the cross product of the un-rotated edges. It is fixed by the
+arrangement of the palm and is positive. Both norms are positive. Therefore
+`k(theta) > 0` for every `theta`, and:
+
+> **sign(s) = sign(cos theta), and s = 0 exactly when theta = 90 degrees.**
+
+A palm flip is a zero crossing of a single scalar, and the crossing is the flip.
+That is what gives an exact instant rather than an interval.
+
+Note what is **not** claimed. `s` is proportional to `cos(theta)`, not equal to
+it: `k` drifts as the projected edges shorten, so the magnitude at a given angle
+depends on the individual hand. Only the sign and the zero are exact, and only
+those carry the detection. The magnitude is used solely for the arming and
+confirmation thresholds, where a drifting scale is tolerable because those
+thresholds are wide.
+
+The figure in the README is generated by `scripts/make-geometry-figure.py`,
+which rotates and projects the landmarks with this same arithmetic and prints
+the resulting `s`. For the model hand it uses, `s(0) = +0.647`, `s(90) = 0` and
+`s(180) = -0.647`.
+
+```
+palmSign
+   +1 │───────╮
+      │        ╲                    palm toward camera
+    0 │─────────╳──────────────     ← the crossing IS the flip
+      │          ╲
+   −1 │           ╰───────────      back toward camera
+      └────────────────────────► time
+             ^
+             the trigger instant, reported as `at`
+```
+
+### 2.5 Why not classify two poses
+
+The obvious alternative is to recognise "palm forward" and "back forward" as
+two classes and fire on the transition. It is worse.
+
+Both classes must be confident for the transition to be trusted, and both are
+least confident exactly during the fast, motion-blurred middle of the rotation,
+which is the part being detected. Tracking a crossing needs confidence only
+before and after that middle, where the hand is slow and the landmarks are good.
+
+It is also cheaper. One subtraction, one cross product, one division, against a
+classifier over 21 points.
+
+### 2.6 Three properties that fall out for free
+
+**Mirror invariant.** A selfie preview is mirrored, which negates `palmSign`
+everywhere. A crossing of a negated signal is still a crossing at the same
+instant.
+
+**Scale invariant.** The value is a bounded ratio, so hand size and distance
+cancel. There is no calibration anywhere in this project.
+
+**Handedness agnostic.** A left hand and a right hand differ in the sign they
+start from, not in whether a crossing occurs. The detector never reads the
+handedness label except to report it.
+
+### 2.7 The state machine
+
+```
+        ┌────────┐   |s| ≥ 0.35 held 120 ms, ≥3 fingers extended
+        │  idle  │ ─────────────────────────────────────────────┐
+        └────────┘                                              │
+             ▲                                                  ▼
+             │                                            ┌──────────┐
+             │  hand closes, or                           │  armed   │
+             │  edge-on longer than 600 ms                └──────────┘
+             │                                                  │
+             │                                       |s| ≤ 0.15  │  record crossedAt
+             │                                                  ▼
+        ┌────────────┐   opposite sign, |s| ≥ 0.30,      ┌────────────┐
+        │  TRIGGER   │ ◄─── 60 ms ≤ elapsed ≤ 600 ms ─── │  crossing  │
+        └────────────┘                                   └────────────┘
+             │                                                  │
+             └──────────► re-arm on the new face ◄──────────────┘
+                          (same sign returns here without firing)
+```
+
+The trigger carries `at = crossedAt`, the instant the palm went edge-on, not
+the instant confirmation arrived.
+
+### 2.8 What each condition rejects
+
+| Condition | The false positive it removes |
+|-----------|-------------------------------|
+| Steady palm held 120 ms before arming | A hand entering the frame already mid-rotation, firing on the tail of a movement never observed |
+| At least three fingers extended | A rotating fist, and a wrist turn while gesturing in conversation |
+| Crossing completes in at least 60 ms | A single frame of bad landmarks inverting the winding |
+| Crossing completes within 600 ms | A hand held edge-on, as when pointing. A slow turn is the same gesture and does fire |
+| Opposite face reached and settles | A hand that wobbles toward edge-on and returns |
+| 1.2 second refractory | One physical flip producing two triggers |
+
+Re-arming after a trigger means a flip back is also caught, which is what makes
+the gesture repeatable without lowering the hand.
+
+---
+
+## 3. The other four detectors
+
+### 3.1 Swipe
+
+Horizontal travel of the palm centroid over a 260 ms window, measured in hand
+spans, with a limit on the vertical component.
+
+Measuring in spans matters here more than anywhere else. A hand near the lens
+crosses far more of the frame per centimetre moved than one at arm's length, so
+a threshold in image units would demand a small movement up close and an
+impossible one further away.
+
+The vertical ratio limit rejects an arm being raised or lowered quickly, which
+is a repositioning rather than a swipe.
+
+The direction of travel is carried into the effect, so the whip pan smears the
+way the hand actually went.
+
+### 3.2 Fist
+
+All four fingers curled, held for 260 ms.
+
+The hold is the whole design. A hand passes through a closed shape constantly,
+while reaching, gripping or lowering an arm. Requiring persistence separates an
+intended gesture from a hand in transit, and costs only the hold duration in
+latency because a freeze has no meaningful onset.
+
+### 3.3 Palm push
+
+An open palm whose span grows by 25 percent over 300 ms.
+
+Apparent growth is used rather than the model's depth coordinate, because depth
+is inferred from a single view and is the noisiest value in the output. Span is
+measured directly in the image plane and grows monotonically as a hand nears
+the lens.
+
+The push requirement exists to keep this gesture disjoint from the palm flip.
+An open palm held toward the camera is the pose a flip starts from, so a
+detector that fired on the pose alone would flash before every single flip. The
+two are separated by intent, not by shape.
+
+### 3.4 Two fingers
+
+Index and middle extended, ring and little finger curled, held 300 ms.
+
+The simplest detector in the project, included partly to demonstrate that the
+engine supports a plain static pose as readily as the temporal gestures beside
+it.
+
+---
+
+## 4. Handling the hard cases
+
+Every item below is handled in code, not merely acknowledged.
+
+| Case | Handling |
+|------|----------|
+| **False positives** | Four independent conditions per gesture, plus a refractory period. Any gesture can also be switched off from its chip |
+| **False negatives** | Thresholds sit at the permissive end of what is unambiguous, on the basis that a missed gesture costs one retry while a spurious one ruins a take |
+| **Lighting** | Nothing in this project improves on the model's own limits. Confidence modulates effect intensity, so a marginal detection produces a weaker effect rather than a full-strength one |
+| **Hand size** | Removed as a variable by span normalisation. Section 1 |
+| **Left and right hands** | Independent state machines keyed by handedness. The flip is agnostic by construction |
+| **Mirrored selfie cameras** | The flip is mirror invariant by construction. Section 2.5. Motion gestures read direction from the same mirrored space the user sees, so a swipe travels the way it appears to |
+| **Hand entering and leaving frame** | A hand unseen for 400 ms has its state cleared, so a gesture cannot complete across an absence |
+| **Multiple hands** | Two hands are tracked as two independent state machines. Cooldown is per gesture rather than per hand, so a two-handed flip is one event and fires one effect |
+| **Low frame rate** | Detectors measure time, never frame counts. At 12 Hz a gesture is recognised later but is still recognised, and the effect it fires is unaffected because playback is decoupled from tracking |
+| **Mobile performance** | Inference is capped at 24 Hz so it cannot consume the render budget. Section 4.2 of the specification |
+| **A hand too far away** | Hands below a minimum span are skipped by the engine, which keeps the guard out of every individual detector |
+
+---
+
+## 5. Adding a gesture
+
+Two steps.
+
+### Step 1: write the detector
+
+Create `Source Code/scripts/gestures/detectors/your-gesture.ts`.
+
+```ts
+import { clamp } from '../../core/geometry';
+import type {
+    DetectorContext,
+    DetectorInstance,
+    GestureDetector,
+    GestureTrigger,
+} from '../types';
+
+class YourGestureDetector implements DetectorInstance {
+    private heldSince = 0;
+
+    update(context: DetectorContext): GestureTrigger | null {
+        const { now, current } = context;
+
+        // Read descriptors, never raw landmarks.
+        if (current.features.extendedCount !== 1) {
+            this.reset();
+            return null;
+        }
+
+        if (this.heldSince === 0) {
+            this.heldSince = now;
+            return null;
+        }
+
+        if (now - this.heldSince < 250) {
+            return null;
+        }
+
+        return {
+            gestureId: 'your-gesture',
+            effectId: 'zoom-punch',
+            at: now,
+            handedness: current.handedness,
+            confidence: clamp((now - this.heldSince) / 500, 0.5, 1),
+        };
+    }
+
+    reset(): void {
+        this.heldSince = 0;
+    }
+}
+
+export const yourGesture: GestureDetector = {
+    id: 'your-gesture',
+    label: 'Your gesture',
+    instruction: 'What the user should do, written as an instruction.',
+    effectId: 'zoom-punch',
+    cooldownMs: 1200,
+    create: () => new YourGestureDetector(),
+};
+```
+
+### Step 2: register it
+
+Add the identifier to `GestureId` in `gestures/types.ts`, add an icon to
+`ui/icons.ts`, and add the detector to the array in `detectors/index.ts`.
+
+The engine, the gesture list and the settings all read from that array. Nothing
+else changes.
+
+### The contract
+
+- `create()` returns a fresh instance per hand. Never share state between hands.
+- `update()` is called once per **tracked** frame, not per rendered frame.
+- Return `null` far more often than a trigger.
+- `at` is the instant the gesture happened. For a hold or a completed movement
+  that is `now`. For a gesture confirmed by evidence that follows it, like the
+  flip, it is the earlier causal instant.
+- `reset()` must clear everything. It is called when the hand leaves the frame
+  and when a recording starts.
+- Put thresholds in `config.ts`, with a comment saying what they measure.
+
+---
+
+## 6. Tuning
+
+Every threshold lives in `Source Code/scripts/config.ts` under `GESTURES`, each
+with a comment recording what it measures and why it holds its value. A bare
+number inside a detector is not reviewable, which is why none exist there.
+
+When adjusting one, the governing principle is:
+
+> A missed gesture costs the user one retry. A spurious gesture ruins the take
+> they were recording.
+
+Bias toward missing. Every default in this project is set that way.
+
+---
+
+<div align="center">
+
+[SPECIFICATION.md](SPECIFICATION.md) · [EFFECTS.md](EFFECTS.md) · [BROWSER-SUPPORT.md](BROWSER-SUPPORT.md) · [README](../README.md)
+
+</div>

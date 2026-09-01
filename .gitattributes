@@ -1,0 +1,30 @@
+# Normalise line endings so a checkout on Windows and one on Linux produce
+# identical files, and the deployment workflow builds what was reviewed.
+* text=auto eol=lf
+
+# Explicit text types
+*.ts        text eol=lf
+*.js        text eol=lf
+*.mjs       text eol=lf
+*.json      text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.md        text eol=lf
+*.yml       text eol=lf
+*.cff       text eol=lf
+*.svg       text eol=lf
+
+# Binary assets, never diffed or converted
+*.woff2     binary
+*.png       binary
+*.jpg       binary
+*.gif       binary
+*.mp4       binary
+*.webm      binary
+*.task      binary
+*.wasm      binary
+
+# Keep documentation and tooling out of the language statistics, so the
+# repository is reported as the TypeScript project it is.
+docs/**         linguist-documentation
+scripts/**      linguist-vendored

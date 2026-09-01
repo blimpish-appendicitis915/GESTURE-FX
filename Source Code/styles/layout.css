@@ -1,0 +1,502 @@
+/**
+ * File: styles/layout.css
+ * Author: Amey Thakur
+ * GitHub: https://github.com/Amey-Thakur
+ * Repository: https://github.com/Amey-Thakur/GESTURE-FX
+ * Release Date: August 31 2026
+ * License: MIT
+ *
+ * Tech Stack: CSS Grid, CSS Flexbox
+ *
+ * Description:
+ * The application shell: masthead, stage, viewfinder and gesture panel, and the
+ * three layouts they take.
+ *
+ * The shell is a three-row grid pinned to the viewport height, so the page
+ * never scrolls and the record control is always reachable without moving the
+ * hand that is performing the gesture.
+ *
+ * The viewfinder's pixel size is set by scripts/ui/viewfinder.ts rather than by
+ * a CSS aspect ratio. Fitting a fixed ratio inside a box constrained on both
+ * axes is not expressible in CSS without one axis being allowed to overflow,
+ * and an overflowing viewfinder in a non-scrolling shell would put part of the
+ * frame permanently out of reach.
+ *
+ * Layouts
+ *   Phone   below 700px   one column, gestures as a scrolling strip
+ *   Tablet  700 to 1079   one column, gestures as a centred grid
+ *   Desktop 1080 and up   two columns, gestures as a fixed side panel
+ */
+
+/* --- Shell -------------------------------------------------------------- */
+
+.app {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+
+    /* Dynamic viewport units track the collapsing address bar on a phone. */
+    height: 100vh;
+    height: 100dvh;
+
+    /* Keeps the shell clear of a notch or a home indicator. */
+    padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+}
+
+/* --- Masthead ----------------------------------------------------------- */
+
+.masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+
+    width: 100%;
+    max-width: var(--shell-max-width);
+    margin-inline: auto;
+    padding: var(--space-3) var(--space-5);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.brand__mark {
+    width: 30px;
+    height: 30px;
+}
+
+.brand__name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-strong);
+    white-space: nowrap;
+}
+
+/**
+ * The second half of the name carries the brand gradient. This is the only
+ * place the gradient is used as text, which is what keeps it a mark rather
+ * than a decoration.
+ */
+.brand__accent {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.masthead__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* --- Stage -------------------------------------------------------------- */
+
+.stage {
+    min-height: 0;
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    max-width: var(--shell-max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+}
+
+.stage__inner {
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--space-4);
+    place-items: center;
+}
+
+/**
+ * The viewfinder and the filter strip beneath it.
+ *
+ * The filter strip takes its natural height and the viewfinder takes the rest,
+ * so selecting a filter never resizes the frame.
+ */
+.stage__main {
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: var(--space-3);
+}
+
+/* The cell the viewfinder is measured against. */
+.stage__viewport {
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+/* --- Viewfinder --------------------------------------------------------- */
+
+.viewfinder {
+    position: relative;
+
+    /* Dimensions are assigned in JavaScript; see the note at the top. */
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+
+    background-color: var(--ink-900);
+    box-shadow: var(--shadow-lg);
+
+    /* The image must never be selected or long-pressed into a context menu. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.viewfinder__canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/**
+ * Corner brackets. They are the one piece of ornament in the interface, and
+ * they are here because a viewfinder is the visual language of a camera and
+ * they mark the recorded area without covering it.
+ */
+.viewfinder__frame {
+    position: absolute;
+    inset: 0;
+    z-index: var(--layer-viewfinder-ui);
+    pointer-events: none;
+}
+
+.viewfinder__frame::before,
+.viewfinder__frame::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--on-video-line);
+    transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.viewfinder__frame::before {
+    top: 12px;
+    left: 12px;
+    border-right: none;
+    border-bottom: none;
+    border-top-left-radius: var(--radius-sm);
+}
+
+.viewfinder__frame::after {
+    right: 12px;
+    bottom: 12px;
+    border-left: none;
+    border-top: none;
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+/* While recording, the brackets take the record colour. */
+.viewfinder[data-recording='true'] .viewfinder__frame::before,
+.viewfinder[data-recording='true'] .viewfinder__frame::after {
+    border-color: var(--record);
+}
+
+/* --- Overlaid viewfinder furniture -------------------------------------- */
+
+.viewfinder__topbar {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    z-index: var(--layer-viewfinder-ui);
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    pointer-events: none;
+}
+
+.viewfinder__footer {
+    position: absolute;
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: var(--layer-viewfinder-ui);
+
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* --- Gesture panel ------------------------------------------------------ */
+
+.panel {
+    width: 100%;
+    min-width: 0;
+}
+
+.panel__heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.panel__title {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/*
+ * Below the desktop breakpoint the panel is a sheet that slides up over the
+ * interface. A horizontally scrolling strip was tried first and rejected: it
+ * hides items behind a swipe the user has to discover, and on a page about hand
+ * gestures it competes with the thing being demonstrated.
+ */
+.panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--layer-overlay);
+
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    padding: var(--space-5) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
+
+    border-top: 1px solid var(--line);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    background-color: var(--ink-900);
+    box-shadow: var(--shadow-lg);
+
+    transform: translateY(101%);
+    visibility: hidden;
+    transition:
+        transform var(--duration-base) var(--ease-out),
+        visibility var(--duration-base) var(--ease-out);
+}
+
+.panel[data-open='true'] {
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.panel__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--layer-overlay) - 1);
+    background-color: var(--scrim);
+}
+
+.panel__list {
+    display: grid;
+    gap: var(--space-2);
+}
+
+/* --- Control bar -------------------------------------------------------- */
+
+.controls {
+    width: 100%;
+    max-width: var(--shell-max-width);
+    margin-inline: auto;
+    padding: var(--space-4) var(--space-5) var(--space-5);
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+/* The outer cells are equal fractions, which keeps the record button centred
+   on the frame regardless of how many controls sit on either side. */
+.controls__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.controls__group--start {
+    justify-content: flex-start;
+}
+
+.controls__group--end {
+    justify-content: flex-end;
+}
+
+/* --- Phone control bar --------------------------------------------------- */
+
+/**
+ * On a narrow screen the aspect selector is wider than an equal third of the
+ * bar, which pushes the outer columns apart and takes the record button off
+ * centre. Moving the selector onto its own row restores the symmetry and keeps
+ * the record button under the middle of the frame, where the thumb expects it.
+ */
+@media (max-width: 699px) {
+    .controls {
+        grid-template-rows: auto auto;
+        row-gap: var(--space-3);
+    }
+
+    /* Row one is setup: the output shape, the gesture sheet, the lens. */
+    .controls__group--start {
+        grid-row: 1;
+        grid-column: 1 / -1;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .controls__group--centre {
+        grid-row: 2;
+        grid-column: 2;
+    }
+
+    /*
+     * Row two is the take, and it is symmetric about the record button.
+     *
+     * The group dissolves so its buttons become grid items in their own right,
+     * one on each side of the record control. Left as a single cell they all
+     * sat to the right of centre, which left the button visually off centre
+     * even though the column arithmetic had placed it exactly on it.
+     */
+    .controls__group--end {
+        display: contents;
+    }
+
+    [data-action='toggle-restyle'] {
+        grid-row: 2;
+        grid-column: 1;
+        justify-self: end;
+    }
+
+    [data-action='toggle-microphone'] {
+        grid-row: 2;
+        grid-column: 3;
+        justify-self: start;
+    }
+}
+
+/* --- Tablet ------------------------------------------------------------- */
+
+@media (min-width: 700px) {
+    .stage__inner {
+        gap: var(--space-5);
+    }
+
+    /* The sheet is wider on a tablet, and its rows sit in two columns. */
+    .panel {
+        left: 50%;
+        right: auto;
+        width: min(640px, 100%);
+        transform: translate(-50%, 101%);
+    }
+
+    .panel[data-open='true'] {
+        transform: translate(-50%, 0);
+    }
+
+    .panel__list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .controls {
+        padding-bottom: var(--space-6);
+    }
+}
+
+/* --- Desktop ------------------------------------------------------------ */
+
+@media (min-width: 1080px) {
+    .stage__inner {
+        grid-template-columns: minmax(0, 1fr) var(--panel-width);
+        grid-template-rows: minmax(0, 1fr);
+        gap: var(--space-7);
+        align-items: center;
+    }
+
+    /*
+     * A desktop has the width for a permanent panel, so the sheet reverts to a
+     * static column and every gesture is visible without an interaction.
+     */
+    .panel {
+        position: static;
+        z-index: auto;
+
+        align-self: center;
+        width: auto;
+        max-height: 100%;
+        overflow-y: auto;
+
+        padding: var(--space-5);
+        border: 1px solid var(--line-subtle);
+        border-radius: var(--radius-lg);
+        background-color: var(--ink-900);
+        box-shadow: none;
+
+        transform: none;
+        visibility: visible;
+    }
+
+    .panel[data-open='true'] {
+        transform: none;
+    }
+
+    .panel__list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panel__backdrop,
+    [data-action='open-gestures'],
+    .panel__close {
+        display: none;
+    }
+
+    /* The control bar aligns under the viewfinder rather than the whole shell,
+       so the record button stays centred on the frame. */
+    .controls {
+        padding-right: calc(var(--panel-width) + var(--space-7) + var(--space-5));
+    }
+}
+
+/* --- Short landscape phones --------------------------------------------- */
+
+/**
+ * A phone held sideways has almost no vertical room. The gesture panel is the
+ * one element that can be dropped without losing function, because every
+ * gesture is also listed in the guide.
+ */
+@media (max-height: 520px) and (orientation: landscape) {
+    .masthead {
+        padding-block: var(--space-2);
+    }
+
+    /* The sheet is capped harder, so it never covers the whole viewport. */
+    .panel {
+        max-height: 82vh;
+        padding-block: var(--space-4);
+    }
+
+    .controls {
+        padding-block: var(--space-2) var(--space-3);
+    }
+}

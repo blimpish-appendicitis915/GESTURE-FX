@@ -1,0 +1,141 @@
+<!doctype html>
+<!--
+  File: 404.html
+  Author: Amey Thakur
+  GitHub: https://github.com/Amey-Thakur
+  Repository: https://github.com/Amey-Thakur/GESTURE-FX
+  Release Date: August 31 2026
+  License: MIT
+
+  Tech Stack: HTML5, CSS3
+
+  Description:
+  The page GitHub Pages serves for an address that does not exist.
+
+  It is styled from the same tokens as the application and it carries the same
+  mark, so a mistyped address still looks like part of the project rather than
+  like a server default. The glitch on the numerals is the application's own
+  signature effect expressed in CSS, which is the one place a decorative
+  flourish earns its place: the error page demonstrates the product.
+-->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#06070A">
+    <meta name="robots" content="noindex">
+
+    <title>Page not found &middot; GESTURE-FX</title>
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+    <link rel="stylesheet" href="./styles/tokens.css">
+    <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/controls.css">
+
+    <style>
+        body {
+            display: grid;
+            place-items: center;
+            padding: var(--space-6);
+            text-align: center;
+        }
+
+        .lost {
+            max-width: 460px;
+        }
+
+        .lost__mark {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto var(--space-6);
+        }
+
+        /**
+         * The status code, split into its colour channels.
+         *
+         * Three copies of the same text are stacked. The outer two are offset
+         * and tinted cyan and magenta, which is exactly what the chromatic
+         * split shader does to a video frame.
+         */
+        .lost__code {
+            position: relative;
+            display: inline-block;
+
+            font-family: var(--font-display);
+            font-size: clamp(4.5rem, 18vw, 7.5rem);
+            font-weight: 300;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: var(--text-strong);
+        }
+
+        .lost__code::before,
+        .lost__code::after {
+            content: attr(data-code);
+            position: absolute;
+            inset: 0;
+            opacity: 0.85;
+        }
+
+        .lost__code::before {
+            color: var(--cyan-400);
+            transform: translate(-5px, -3px);
+        }
+
+        .lost__code::after {
+            color: var(--magenta-400);
+            transform: translate(5px, 3px);
+        }
+
+        .lost__title {
+            margin-top: var(--space-5);
+            font-size: var(--text-xl);
+        }
+
+        .lost__body {
+            margin-top: var(--space-3);
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        .lost__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            justify-content: center;
+            margin-top: var(--space-7);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="lost">
+        <svg class="lost__mark" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="14" fill="#0B0D12" />
+            <g fill="none" stroke-width="3.5" stroke-linejoin="round">
+                <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#2EE0FB"
+                    transform="translate(-3.5 -3.5)" />
+                <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#FF4D9D"
+                    transform="translate(3.5 3.5)" />
+                <rect x="16.5" y="16.5" width="31" height="31" rx="8" stroke="#F2F5FA" />
+            </g>
+        </svg>
+
+        <p class="lost__code" data-code="404" aria-label="404">404</p>
+
+        <h1 class="lost__title">This frame does not exist</h1>
+        <p class="lost__body">
+            The address you followed is not part of GESTURE-FX. It may have been renamed, or the
+            link may have been mistyped.
+        </p>
+
+        <div class="lost__actions">
+            <a class="button button--primary" href="./">Open the camera</a>
+            <a class="button" href="https://github.com/Amey-Thakur/GESTURE-FX">View the repository</a>
+        </div>
+    </main>
+</body>
+
+</html>

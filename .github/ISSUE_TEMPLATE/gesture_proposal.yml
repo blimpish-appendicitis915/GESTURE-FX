@@ -1,0 +1,62 @@
+name: Gesture proposal
+description: Propose a new gesture for the detection engine.
+title: '[Gesture] '
+labels: ['gesture', 'enhancement']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A gesture is one file against a documented contract.
+        [docs/GESTURES.md](https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/GESTURES.md)
+        has a worked example, and you are welcome to open a pull request rather
+        than an issue.
+
+  - type: input
+    id: name
+    attributes:
+      label: What is the gesture called
+      placeholder: Snap, pinch, thumbs up, hand covering the lens
+    validations:
+      required: true
+
+  - type: textarea
+    id: movement
+    attributes:
+      label: Describe the movement
+      description: Write it as an instruction, the way it would appear in the interface.
+      placeholder: Bring your thumb and index finger together sharply.
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection
+    attributes:
+      label: How would it be detected
+      description: |
+        Which descriptors in `HandFeatures` separate it from everything else?
+        Distances, extension ratios, palm orientation, travel over a window.
+        A rough idea is fine; working it out is part of the discussion.
+      placeholder: The distance between landmarks 4 and 8, divided by span, falling below 0.3 within 120 ms.
+    validations:
+      required: true
+
+  - type: textarea
+    id: false-positives
+    attributes:
+      label: What would fire it by accident
+      description: |
+        The most important question. Every detector in this project spends most
+        of its logic rejecting near misses. Which ordinary movements resemble
+        this one, and what would separate them?
+      placeholder: Picking something up looks similar, so it would also need the hand to be facing the camera.
+    validations:
+      required: true
+
+  - type: input
+    id: effect
+    attributes:
+      label: Which effect should it fire
+      placeholder: Any registered effect, or a new one
+    validations:
+      required: false

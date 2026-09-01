@@ -1,0 +1,58 @@
+{
+  "name": "gesture-fx",
+  "version": "1.0.0",
+  "description": "Gesture-triggered camera effects in the browser. Flip your hand and the recording glitches, with no server, no upload and no manual editing.",
+  "keywords": [
+    "gesture-recognition",
+    "hand-tracking",
+    "hand-gesture-recognition",
+    "mediapipe",
+    "webgl",
+    "webcam",
+    "video-effects",
+    "mediarecorder",
+    "computer-vision",
+    "glitch-effect",
+    "browser",
+    "client-side",
+    "privacy",
+    "typescript",
+    "vite"
+  ],
+  "homepage": "https://amey-thakur.github.io/GESTURE-FX/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amey-Thakur/GESTURE-FX.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Amey-Thakur/GESTURE-FX/issues"
+  },
+  "author": {
+    "name": "Amey Thakur",
+    "url": "https://github.com/Amey-Thakur"
+  },
+  "license": "MIT",
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "vendor:models": "node scripts/vendor-models.mjs"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}

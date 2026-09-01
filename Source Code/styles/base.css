@@ -1,0 +1,175 @@
+/**
+ * File: styles/base.css
+ * Author: Amey Thakur
+ * GitHub: https://github.com/Amey-Thakur
+ * Repository: https://github.com/Amey-Thakur/GESTURE-FX
+ * Release Date: August 31 2026
+ * License: MIT
+ *
+ * Tech Stack: CSS
+ *
+ * Description:
+ * Font declarations, the reset, and the document defaults.
+ *
+ * Both typefaces are served from this repository rather than from a font
+ * network. The application states that it makes no network requests once
+ * loaded, and a stylesheet that fetches fonts from a third party would make
+ * that claim false, quite apart from disclosing every visitor to that party.
+ *
+ * Outfit and Inter are variable fonts, so one file covers every weight used.
+ * Together they add 80 KB.
+ */
+
+/* --- Typefaces ---------------------------------------------------------- */
+
+/**
+ * Outfit: geometric, used for the brand mark, headings and numerals.
+ * SIL Open Font License 1.1. See assets/fonts/OFL.txt.
+ */
+@font-face {
+    font-family: 'Outfit';
+    src: url('../assets/fonts/outfit-variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/**
+ * Inter: designed for user interfaces, used for body and control text.
+ * SIL Open Font License 1.1. See assets/fonts/OFL.txt.
+ */
+@font-face {
+    font-family: 'Inter';
+    src: url('../assets/fonts/inter-variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --- Reset -------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    /* Prevents iOS from enlarging text when the device is turned sideways. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--ink-950);
+    color: var(--text-primary);
+
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    font-weight: 400;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* The interface is a fixed shell; only overlay bodies scroll. */
+    overflow: hidden;
+
+    /* A double tap must not zoom: the record control is tapped repeatedly. */
+    touch-action: manipulation;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+    color: var(--text-strong);
+    letter-spacing: -0.01em;
+}
+
+/* Numerals must not shift width as a timer counts. */
+.tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+}
+
+button,
+input,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+canvas {
+    display: block;
+}
+
+/* --- Focus -------------------------------------------------------------- */
+
+/**
+ * A single visible focus treatment for every interactive element. It is applied
+ * only for keyboard focus, so a pointer user never sees a ring while a keyboard
+ * user is never left guessing where they are.
+ */
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--cyan-400);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+/* --- Utilities ---------------------------------------------------------- */
+
+/** Available to assistive technology, absent from the visual layout. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+[hidden] {
+    display: none !important;
+}

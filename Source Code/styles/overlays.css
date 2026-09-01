@@ -1,0 +1,979 @@
+/**
+ * File: styles/overlays.css
+ * Author: Amey Thakur
+ * GitHub: https://github.com/Amey-Thakur
+ * Repository: https://github.com/Amey-Thakur/GESTURE-FX
+ * Release Date: August 31 2026
+ * License: MIT
+ *
+ * Tech Stack: CSS
+ *
+ * Description:
+ * The full-screen states: loading, camera permission, error, the intro guide,
+ * the countdown and the review panel.
+ *
+ * Every overlay shares one card so the application reads as a single object
+ * rather than a sequence of dialogs. The card is centred on both axes at every
+ * size, which is the symmetry the rest of the interface is built around.
+ *
+ * The countdown is the exception: it draws directly onto the viewfinder rather
+ * than over the page, because the user is already looking at the frame and
+ * moving their eyes away three seconds before performing a gesture would defeat
+ * the purpose of the countdown.
+ */
+
+/* --- Overlay shell ------------------------------------------------------ */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--layer-overlay);
+
+    display: grid;
+    place-items: center;
+    padding: var(--space-5);
+
+    background-color: var(--scrim);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    animation: overlay-in var(--duration-base) var(--ease-out);
+}
+
+@keyframes overlay-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.card {
+    width: 100%;
+    max-width: 460px;
+    max-height: 100%;
+    overflow-y: auto;
+
+    padding: var(--space-7);
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    background-color: var(--ink-900);
+    box-shadow: var(--shadow-lg);
+
+    text-align: center;
+}
+
+/** The review card is wider, because it holds a video beside its actions. */
+.card--wide {
+    max-width: 560px;
+}
+
+.card__mark {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--space-5);
+
+    border-radius: var(--radius-lg);
+    background-color: var(--ink-800);
+    color: var(--cyan-400);
+}
+
+.card__mark--danger {
+    color: var(--danger);
+}
+
+.card__title {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-3);
+}
+
+.card__body {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-normal);
+}
+
+.card__remedy {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+
+    border-left: 2px solid var(--cyan-500);
+    border-radius: var(--radius-sm);
+    background-color: var(--ink-850);
+
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-top: var(--space-6);
+}
+
+.card__footnote {
+    margin-top: var(--space-5);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+/* --- Loading ------------------------------------------------------------ */
+
+.loader {
+    margin-top: var(--space-6);
+}
+
+.loader__track {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background-color: var(--ink-750);
+    overflow: hidden;
+}
+
+.loader__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: var(--radius-pill);
+    background: var(--brand-gradient);
+    transition: width var(--duration-base) var(--ease-out);
+}
+
+/** Used while a stage reports no measurable progress. */
+.loader__fill[data-indeterminate='true'] {
+    width: 35%;
+    animation: loader-sweep 1.3s var(--ease-in-out) infinite;
+}
+
+@keyframes loader-sweep {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(340%);
+    }
+}
+
+.loader__label {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+/* --- Intro guide -------------------------------------------------------- */
+
+.guide__steps {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    text-align: left;
+}
+
+.guide__step {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background-color: var(--ink-850);
+}
+
+/** The step that is the point of the application. */
+.guide__step--feature {
+    border: 1px solid var(--cyan-500);
+    background-color: rgba(46, 224, 251, 0.08);
+}
+
+.guide__step--feature .guide__index {
+    background: var(--brand-gradient);
+    color: var(--on-accent);
+}
+
+.guide__index {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+
+    border-radius: var(--radius-pill);
+    background-color: var(--ink-700);
+
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--accent-text);
+}
+
+.guide__text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.guide__text strong {
+    display: block;
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.guide__privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    margin-top: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-md);
+    background-color: rgba(61, 220, 151, 0.06);
+
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-align: left;
+}
+
+.guide__privacy svg {
+    color: var(--success);
+    margin-top: 2px;
+}
+
+/* --- Settings ----------------------------------------------------------- */
+
+.settings {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    text-align: left;
+}
+
+/**
+ * One setting: its name and explanation on the left, its choices on the right.
+ *
+ * A grid rather than a flex row, so every control in the panel begins at the
+ * same distance from the right edge whatever its label says. Laid out as a flex
+ * row the choices ended wherever their text happened to end, and a column of
+ * controls that do not line up is the thing that makes a settings panel look
+ * unfinished however carefully each row is written.
+ */
+.setting {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--ink-850);
+}
+
+/**
+ * A row with more choices than will sit beside its description.
+ *
+ * The control takes the full width of the row and its options divide that width
+ * equally, so the bar is filled rather than trailing off. The alternative,
+ * letting seven options wrap, produces two ragged lines and a row twice the
+ * height of every other one.
+ */
+.setting--wide {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.setting--wide .segmented {
+    width: 100%;
+}
+
+.setting--wide .segmented__option {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 var(--space-2);
+    letter-spacing: 0.02em;
+}
+
+.setting__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.setting__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.setting__description {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+/**
+ * Every narrow control is the same width, and its options divide it equally.
+ *
+ * Without the floor, a two-choice row is half the width of a three-choice one
+ * and the column of controls is ragged. With it, and with the options sharing
+ * the width, the whole panel reads as one object.
+ */
+.setting .segmented {
+    flex: 0 0 auto;
+    min-width: 208px;
+}
+
+.setting .segmented__option {
+    flex: 1 1 0;
+    text-align: center;
+}
+
+/* On a phone the description and its control stack, and the control then
+   spans the row for the same reason a wide one does. */
+@media (max-width: 520px) {
+    .setting {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .setting .segmented {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* --- Countdown ---------------------------------------------------------- */
+
+.countdown {
+    position: absolute;
+    inset: 0;
+    z-index: var(--layer-viewfinder-ui);
+
+    display: grid;
+    place-items: center;
+
+    background-color: var(--video-scrim);
+    pointer-events: none;
+}
+
+.countdown__value {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 22vmin, 9rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--on-video);
+    text-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
+
+    animation: countdown-tick var(--duration-slow) var(--ease-out);
+}
+
+@keyframes countdown-tick {
+    from {
+        opacity: 0;
+        transform: scale(1.35);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- Review ------------------------------------------------------------- */
+
+.review__video {
+    width: 100%;
+    max-height: 52vh;
+    border-radius: var(--radius-lg);
+    background-color: var(--ink-950);
+    margin-bottom: var(--space-5);
+}
+
+.review__meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.review__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* --- Small screens ------------------------------------------------------ */
+
+@media (max-width: 520px) {
+    .card {
+        padding: var(--space-6) var(--space-5);
+        border-radius: var(--radius-lg);
+    }
+
+    .card__actions .button {
+        flex: 1 1 100%;
+    }
+}
+
+/* --- The guide illustration --------------------------------------------- */
+
+/**
+ * The finger frame, drawn rather than photographed.
+ *
+ * A first-time reader has to learn one pose before anything else in the
+ * application makes sense, and a sentence describing where to put four fingers
+ * is slower to read than a picture of it. The drawing carries the same corner
+ * marks the shader draws, so the connection between the diagram and what the
+ * viewfinder shows is made before the camera is even allowed.
+ */
+.demo {
+    margin: 0 0 var(--space-6);
+    padding: var(--space-5) var(--space-4) var(--space-4);
+
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(130% 100% at 50% 0%, rgba(46, 224, 251, 0.10), transparent 68%),
+        var(--ink-850);
+}
+
+.demo__art {
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    height: auto;
+    margin-inline: auto;
+}
+
+.demo__window {
+    fill: rgba(46, 224, 251, 0.13);
+    stroke: var(--cyan-400);
+    stroke-width: 2.5;
+    stroke-dasharray: 8 6;
+    stroke-linejoin: round;
+}
+
+/**
+ * The subject, drawn twice.
+ *
+ * Once as the camera sees it, and once inside the window in the medium the
+ * shader would redraw it in. Showing both in one picture is what makes the
+ * gesture explain itself: the reader sees that the window changes what is
+ * inside it and leaves the rest of the frame alone.
+ */
+.demo__subject {
+    fill: var(--ink-700);
+}
+
+.demo__subject--drawn {
+    fill: #e8b184;
+    stroke: #1b1420;
+    stroke-width: 4;
+    stroke-linejoin: round;
+}
+
+.demo__face {
+    fill: #1b1420;
+    stroke: #1b1420;
+    stroke-width: 4;
+    stroke-linecap: round;
+}
+
+.demo__face path {
+    fill: none;
+}
+
+.demo__palm {
+    fill: var(--ink-800);
+    stroke: var(--text-secondary);
+    stroke-width: 6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.demo__finger {
+    fill: none;
+    stroke: var(--text-secondary);
+    stroke-width: 18;
+    stroke-linecap: round;
+}
+
+.demo__curl {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 6;
+    stroke-linecap: round;
+}
+
+.demo__corner circle {
+    fill: var(--cyan-400);
+}
+
+.demo__caption {
+    margin-top: var(--space-4);
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+}
+
+/* --- The method panel ---------------------------------------------------- */
+
+/**
+ * Wider than a dialog and narrower than the page.
+ *
+ * This is the one overlay that is read rather than acted on, so its measure is
+ * set for reading: about seventy characters, which is where a line stops
+ * needing the eye to search for the start of the next one.
+ */
+.card--reading {
+    max-width: 660px;
+    text-align: left;
+}
+
+.card--reading .card__title,
+.card--reading .card__body {
+    text-align: left;
+}
+
+.method {
+    display: grid;
+    gap: var(--space-5);
+
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: method;
+}
+
+.method__step {
+    counter-increment: method;
+    position: relative;
+
+    padding: var(--space-5) var(--space-5) var(--space-5) var(--space-8);
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--ink-850);
+}
+
+/** The step number, set in the display face and kept out of the text flow. */
+.method__step::before {
+    content: counter(method);
+    position: absolute;
+    top: var(--space-5);
+    left: var(--space-4);
+
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent-text);
+}
+
+.method__title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--text-strong);
+    margin-bottom: var(--space-2);
+}
+
+.method__text {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-secondary);
+}
+
+/** The sentence that says what the step buys, set apart from what it does. */
+.method__text--aside {
+    margin-top: var(--space-3);
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--line);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+/**
+ * A formula, set in the interface face with real symbols rather than an image.
+ *
+ * Typesetting it as text keeps it selectable, searchable, readable by a screen
+ * reader, and correct at every zoom level, none of which a rendered equation
+ * would be. It is also indexable, which is the difference between a page a
+ * search engine can describe and one it can only list.
+ */
+.formula {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+
+    border-radius: var(--radius-sm);
+    background-color: var(--ink-800);
+
+    font-size: var(--text-sm);
+    line-height: 1.9;
+    color: var(--text-primary);
+    text-align: center;
+
+    overflow-x: auto;
+}
+
+.formula em {
+    font-style: italic;
+}
+
+.formula sub,
+.formula sup {
+    font-size: 0.72em;
+}
+
+/** Inside a definition, the formula follows the prose rather than centring. */
+.formula--inline {
+    display: block;
+    margin-top: var(--space-3);
+    text-align: left;
+    font-size: var(--text-xs);
+}
+
+.method__parts {
+    margin-top: var(--space-4);
+    display: grid;
+    gap: var(--space-4);
+}
+
+.method__parts dt {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: var(--space-1);
+}
+
+.method__parts dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--text-secondary);
+}
+
+.method__art {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    margin: var(--space-4) auto 0;
+}
+
+.method__bone {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+}
+
+.method__joint circle {
+    fill: var(--cyan-400);
+}
+
+.method__shape {
+    fill: rgba(46, 224, 251, 0.12);
+    stroke: var(--cyan-400);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+}
+
+.method__ray {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    stroke-dasharray: 6 5;
+}
+
+.method__cross circle {
+    fill: var(--magenta-400);
+}
+
+.method__flow rect {
+    fill: var(--ink-800);
+    stroke: var(--line);
+    stroke-width: 1.5;
+}
+
+.method__flow path {
+    fill: none;
+    stroke: var(--cyan-400);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.method__flowLabel text {
+    fill: var(--text-secondary);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    text-anchor: middle;
+}
+
+@media (max-width: 520px) {
+    .method__step {
+        padding: var(--space-4) var(--space-4) var(--space-4) var(--space-7);
+    }
+
+    .method__step::before {
+        left: var(--space-3);
+        top: var(--space-4);
+    }
+}
+
+/* --- Form fields --------------------------------------------------------- */
+
+/**
+ * Used only by the restyle panel, which is the one place in the application
+ * that asks the user to type something.
+ *
+ * Everything else here is a choice between named options, and that is
+ * deliberate: a control that cannot be got wrong needs no validation and no
+ * error state. A key and a prompt cannot be offered that way, so this is where
+ * the input styles live and the only place they are needed.
+ */
+.field {
+    display: grid;
+    gap: var(--space-2);
+
+    margin-top: var(--space-5);
+    padding: var(--space-4);
+
+    border: 1px solid var(--line-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--ink-850);
+
+    text-align: left;
+}
+
+/** A field whose control sits beside its label rather than under it. */
+.field--row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.field__text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.field__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.field__hint {
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-muted);
+}
+
+.field__row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.field__row .input {
+    flex: 1 1 220px;
+}
+
+.input {
+    min-width: 0;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-3);
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background-color: var(--ink-900);
+
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+}
+
+.input:focus-visible {
+    outline: 2px solid var(--cyan-400);
+    outline-offset: 1px;
+}
+
+.input--area {
+    width: 100%;
+    resize: vertical;
+    line-height: var(--leading-normal);
+}
+
+/**
+ * A checkbox with its label, sized so the whole row is the target.
+ *
+ * The native control is kept rather than replaced. It is already announced
+ * correctly, already operable from the keyboard, and already looks like what it
+ * is on every platform, none of which a styled span would be.
+ */
+.checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.checkbox input {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--cyan-500);
+    cursor: pointer;
+}
+
+/* --- A notice that must be read ------------------------------------------ */
+
+/**
+ * Used once, above the restyle controls.
+ *
+ * It carries the three facts a user is entitled to before they press a button
+ * that spends their money and sends their recording somewhere: that it is
+ * uploaded, that it is billed to them, and that it takes minutes. It is styled
+ * to be read rather than skimmed past, and it is not dismissible.
+ */
+.notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    margin-top: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+
+    border: 1px solid rgba(181, 106, 0, 0.34);
+    border-radius: var(--radius-md);
+    background-color: rgba(181, 106, 0, 0.10);
+
+    font-size: var(--text-xs);
+    line-height: var(--leading-normal);
+    color: var(--text-secondary);
+    text-align: left;
+}
+
+.notice svg {
+    color: var(--warning);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.notice strong {
+    color: var(--text-strong);
+}
+
+/* --- A row of choices ---------------------------------------------------- */
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.chips__option {
+    padding: var(--space-2) var(--space-4);
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background-color: var(--ink-800);
+
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+
+    cursor: pointer;
+    transition:
+        border-color var(--duration-fast) var(--ease-out),
+        background-color var(--duration-fast) var(--ease-out),
+        color var(--duration-fast) var(--ease-out);
+}
+
+.chips__option:hover:not(:disabled) {
+    border-color: var(--line-strong);
+    color: var(--text-strong);
+}
+
+.chips__option[aria-checked='true'] {
+    border-color: var(--cyan-500);
+    background-color: rgba(46, 224, 251, 0.12);
+    color: var(--accent-text);
+}
+
+.chips__option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Something most users never open ------------------------------------- */
+
+.advanced {
+    margin-top: var(--space-4);
+    text-align: left;
+}
+
+.advanced__summary {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.advanced__summary:focus-visible {
+    outline: 2px solid var(--cyan-400);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+.advanced[open] .advanced__summary {
+    margin-bottom: var(--space-3);
+}
+
+.advanced .input {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+/* --- Progress on a job that takes minutes -------------------------------- */
+
+.progress {
+    margin-top: var(--space-5);
+    text-align: left;
+}
+
+.progress__label {
+    margin-top: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap for GESTURE-FX
+  Author: Amey Thakur
+  Repository: https://github.com/Amey-Thakur/GESTURE-FX
+  License: MIT
+
+  The application is a single page. The documentation lives in the repository
+  rather than on the site, so it is indexed through GitHub and is not listed
+  here.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://amey-thakur.github.io/GESTURE-FX/</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

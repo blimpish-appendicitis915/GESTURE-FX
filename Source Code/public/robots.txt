@@ -1,0 +1,24 @@
+# robots.txt for GESTURE-FX
+# https://amey-thakur.github.io/GESTURE-FX/
+#
+# Everything here is public documentation and a public application. There is no
+# private area, no user content and no account, so nothing is disallowed.
+
+User-agent: *
+Allow: /
+
+# Crawlers that train or answer from web content are welcome. The project is
+# open source under the MIT licence and is intended to be found and cited.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://amey-thakur.github.io/GESTURE-FX/sitemap.xml

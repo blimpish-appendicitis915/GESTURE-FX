@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output, produced by the deployment workflow
+dist/
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and caches
+*.log
+npm-debug.log*
+.npm/
+.cache/
+.vite/
+
+# Environment files. This project has no secrets and needs none; the entry
+# exists so that a contributor's local file cannot be committed by accident.
+.env
+.env.*
+
+# Vendored tracking assets, written by `npm run vendor:models`. They are
+# fetched from a content delivery network at runtime by default and are not
+# stored in the repository.
+Source Code/assets/models/
+
+# Local editor and agent tooling
+.claude/
+
+# LaTeX build products. The compiled PDF is committed; its intermediates are not.
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.xdv
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
