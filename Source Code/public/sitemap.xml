@@ -5,15 +5,31 @@
   Repository: https://github.com/Amey-Thakur/GESTURE-FX
   License: MIT
 
-  The application is a single page. The documentation lives in the repository
-  rather than on the site, so it is indexed through GitHub and is not listed
-  here.
+  Two pages are served: the application and the published detector evaluation.
+  The written documentation lives in the repository rather than on the site, so
+  it is indexed through GitHub and is not listed here. The 404 page is excluded
+  deliberately, because a soft error page in a sitemap is a crawl error.
 -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
   <url>
     <loc>https://amey-thakur.github.io/GESTURE-FX/</loc>
-    <lastmod>2026-08-31</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://amey-thakur.github.io/GESTURE-FX/social-preview.png</image:loc>
+      <image:title>GESTURE-FX</image:title>
+      <image:caption>A camera frame beside the same frame redrawn as a cartoon, oil paint, a comic, a screen print, neon, a pencil sketch and pen and ink</image:caption>
+    </image:image>
   </url>
+
+  <url>
+    <loc>https://amey-thakur.github.io/GESTURE-FX/evaluation.html</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>

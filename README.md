@@ -88,9 +88,11 @@ Four decisions carry the result.
 ### Where this decomposition comes from
 
 The three-way split is not this project's. It is the white-box formulation of
-cartoon representation, and I have a published paper that extends it with a
-generative adversarial network trained to produce each representation and to
-recombine them.
+cartoon representation, and it is the subject of a paper I wrote with
+[Mega Satish](https://github.com/msatmod) and
+[Hasan Rizvi](https://github.com/rizvihasan), which extends the same
+decomposition with a generative adversarial network trained to produce each
+representation and to recombine them.
 
 | | **[White-Box Cartoonization](https://github.com/Amey-Thakur/WHITE-BOX-CARTOONIZATION)** | **This window** |
 | --- | --- | --- |
@@ -107,15 +109,17 @@ does. The window needs the second, because the effect has to be in the frame
 being recorded and not in a file produced afterwards.
 
 > [!NOTE]
-> **Prior work, named.** *White-Box Cartoonization Using an Extended GAN
-> Framework*, Amey Thakur, Mega Satish and Hasan Rizvi, IJEAST 5(12), 2021.
+> **Prior work, and who wrote it.** *White-Box Cartoonization Using an Extended
+> GAN Framework*, by Amey Thakur, [Mega Satish](https://github.com/msatmod) and
+> [Hasan Rizvi](https://github.com/rizvihasan). IJEAST 5(12), 2021.
 > [DOI](https://doi.org/10.33564/IJEAST.2021.v05i12.049) ·
 > [Repository](https://github.com/Amey-Thakur/WHITE-BOX-CARTOONIZATION) ·
 > [Preprint](https://arxiv.org/abs/2107.04551)
 >
-> What is new here is the analytic construction of each representation and the
-> derivation of the three constants that govern them, which
-> [the paper](paper/) sets out in full.
+> That work is theirs as much as mine, and the credit for it belongs to that
+> paper rather than to this one. GESTURE-FX is my own. What is new here is the
+> closed-form construction of each representation and the derivation of the
+> three constants that govern them, which [the paper](paper/) sets out in full.
 
 <br>
 
@@ -614,7 +618,7 @@ TypeScript, no framework, one runtime dependency. WebGL 2. The browser's own enc
 
 <img src="https://github.com/Amey-Thakur.png" alt="Amey Thakur" width="56" align="left" style="border-radius:8px">
 
-**[Amey Thakur](https://github.com/Amey-Thakur)** · I wanted to know whether a browser could catch a gesture on the exact frame it happens. The answer was a cross product. What still does not work is written down.
+**[Amey Thakur](https://github.com/Amey-Thakur)** · I wanted to know whether a browser could catch a gesture on the exact frame it happens. The answer was a cross product.
 
 <br clear="left">
 

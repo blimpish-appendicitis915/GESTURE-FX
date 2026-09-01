@@ -12,11 +12,7 @@
       "@type": "Person",
       "givenName": "Amey",
       "familyName": "Thakur",
-      "@id": "https://orcid.org/0000-0001-5644-1575",
-      "affiliation": {
-        "@type": "Organization",
-        "name": "University of Mumbai"
-      }
+      "@id": "https://orcid.org/0000-0001-5644-1575"
     }
   ],
   "maintainer": {
@@ -59,7 +55,8 @@
     "Web browser with WebGL 2 and WebAssembly"
   ],
   "operatingSystem": [
-    "Any"
+    "Any",
+    "Web browser"
   ],
   "softwareRequirements": [
     {
@@ -70,23 +67,46 @@
       "url": "https://www.npmjs.com/package/@mediapipe/tasks-vision"
     }
   ],
-  "applicationCategory": "Computer Vision",
-  "applicationSubCategory": "Real-time gesture recognition and video effects",
+  "applicationCategory": "MultimediaApplication",
+  "applicationSubCategory": "Computer Vision",
   "keywords": [
     "gesture recognition",
-    "hand tracking",
     "hand gesture recognition",
-    "human computer interaction",
-    "real-time video processing",
-    "computer vision",
+    "hand tracking",
+    "finger frame",
+    "palm flip detection",
+    "gesture triggered video effects",
+    "real-time video effects",
+    "webcam effects",
+    "browser computer vision",
+    "client-side computer vision",
+    "on-device inference",
+    "non-photorealistic rendering",
+    "cartoon shader",
+    "white-box cartoonization",
+    "bilateral filter",
+    "difference of Gaussians",
     "WebGL",
+    "WebGL 2",
+    "GLSL",
     "MediaPipe",
     "MediaRecorder",
-    "client-side computing",
+    "getUserMedia",
+    "canvas captureStream",
+    "TypeScript",
+    "WebAssembly",
+    "progressive web app",
+    "GitHub Pages",
     "privacy preserving",
-    "edge inference",
-    "web application",
-    "TypeScript"
+    "no server",
+    "open source",
+    "zero crossing detection",
+    "temporal localisation",
+    "human computer interaction",
+    "Amey Thakur",
+    "ameythakur",
+    "amey-thakur",
+    "ameyarc"
   ],
   "readme": "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/README.md",
   "isAccessibleForFree": true,
@@ -95,5 +115,36 @@
     "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/GESTURES.md",
     "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/EFFECTS.md",
     "https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/BROWSER-SUPPORT.md"
+  ],
+  "softwareHelp": "https://github.com/Amey-Thakur/GESTURE-FX#readme",
+  "downloadUrl": "https://github.com/Amey-Thakur/GESTURE-FX/archive/refs/heads/main.zip",
+  "releaseNotes": "https://github.com/Amey-Thakur/GESTURE-FX/releases",
+  "contIntegration": "https://github.com/Amey-Thakur/GESTURE-FX/actions",
+  "isPartOf": "https://amey-thakur.github.io/",
+  "inLanguage": "en",
+  "citation": [
+    {
+      "@type": "ScholarlyArticle",
+      "name": "White-Box Cartoonization Using an Extended GAN Framework",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Amey",
+          "familyName": "Thakur"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Mega",
+          "familyName": "Satish"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Hasan",
+          "familyName": "Rizvi"
+        }
+      ],
+      "identifier": "https://doi.org/10.33564/IJEAST.2021.v05i12.049",
+      "datePublished": "2021"
+    }
   ]
 }

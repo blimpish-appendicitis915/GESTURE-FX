@@ -48,8 +48,75 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex">
     <title>GESTURE-FX &middot; Detector Evaluation</title>
+
+    <meta name="description"
+        content="The GESTURE-FX palm-flip detector, evaluated in your browser against a seeded synthetic corpus where the crossing time is known exactly. 95.0 per cent detected, 0 false positives in 240 near-miss sequences, 6.7 ms mean localisation error. Runs the shipped modules, so the figures are reproduced rather than reported.">
+    <meta name="author" content="Amey Thakur">
+    <meta name="keywords"
+        content="gesture detection evaluation, palm flip detection, hand gesture benchmark, temporal localisation error, false positive rate, zero crossing detection, reproducible evaluation, browser computer vision, MediaPipe, GESTURE-FX, Amey Thakur">
+
+    <link rel="canonical" href="https://amey-thakur.github.io/GESTURE-FX/evaluation.html">
+
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="GESTURE-FX">
+    <meta property="og:title" content="GESTURE-FX &middot; Detector Evaluation">
+    <meta property="og:description"
+        content="95.0 per cent of palm flips detected, 0 false positives in 240 near-miss sequences, 6.7 ms mean localisation error. Reproduced in your own browser against the shipped modules.">
+    <meta property="og:url" content="https://amey-thakur.github.io/GESTURE-FX/evaluation.html">
+    <meta property="og:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GESTURE-FX &middot; Detector Evaluation">
+    <meta name="twitter:description"
+        content="95.0 per cent of palm flips detected, 0 false positives in 240 near-miss sequences, 6.7 ms mean localisation error. Reproduced in your own browser.">
+    <meta name="twitter:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
+
+    <script type="application/ld+json">
+    {
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            "name": "GESTURE-FX palm-flip detector evaluation",
+            "description": "The GESTURE-FX palm-flip detector, evaluated in your browser against a seeded synthetic corpus where the crossing time is known exactly. 95.0 per cent detected, 0 false positives in 240 near-miss sequences, 6.7 ms mean localisation error. Runs the shipped modules, so the figures are reproduced rather than reported.",
+            "url": "https://amey-thakur.github.io/GESTURE-FX/evaluation.html",
+            "license": "https://opensource.org/licenses/MIT",
+            "isAccessibleForFree": true,
+            "creator": {
+                    "@type": "Person",
+                    "name": "Amey Thakur",
+                    "url": "https://github.com/Amey-Thakur",
+                    "identifier": "https://orcid.org/0000-0001-5644-1575"
+            },
+            "measurementTechnique": "Seeded synthetic landmark corpus with exact ground-truth crossing times, evaluated against the shipped detector modules",
+            "variableMeasured": [
+                    {
+                            "@type": "PropertyValue",
+                            "name": "Detection rate",
+                            "value": "95.0",
+                            "unitText": "percent"
+                    },
+                    {
+                            "@type": "PropertyValue",
+                            "name": "False positives",
+                            "value": "0",
+                            "description": "across 240 near-miss sequences"
+                    },
+                    {
+                            "@type": "PropertyValue",
+                            "name": "Mean localisation error",
+                            "value": "6.7",
+                            "unitText": "ms"
+                    },
+                    {
+                            "@type": "PropertyValue",
+                            "name": "Median localisation error",
+                            "value": "4.0",
+                            "unitText": "ms"
+                    }
+            ],
+            "isPartOf": "https://amey-thakur.github.io/GESTURE-FX/"
+    }
+    </script>
 
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="stylesheet" href="./styles/tokens.css">

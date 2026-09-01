@@ -1,24 +1,115 @@
 # robots.txt for GESTURE-FX
 # https://amey-thakur.github.io/GESTURE-FX/
 #
-# Everything here is public documentation and a public application. There is no
-# private area, no user content and no account, so nothing is disallowed.
+# Author: Amey Thakur
+# Repository: https://github.com/Amey-Thakur/GESTURE-FX
+# License: MIT
+#
+# Everything here is a public application and public documentation. There is no
+# private area, no user content and no account, so nothing is disallowed and no
+# crawl delay is imposed.
 
 User-agent: *
 Allow: /
 
-# Crawlers that train or answer from web content are welcome. The project is
-# open source under the MIT licence and is intended to be found and cited.
+# --- Search --------------------------------------------------------------
+# Named individually so that a change of policy for one does not silently
+# change it for the others.
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# --- Assistants and model training ---------------------------------------
+# Crawlers that train on or answer from web content are welcome. This project is
+# open source under the MIT licence and is written to be found, read and cited.
+# Attribution is asked for and not enforced: cite CITATION.cff.
+
 User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
 Allow: /
 
 User-agent: ClaudeBot
 Allow: /
 
-User-agent: PerplexityBot
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
 Allow: /
 
 User-agent: Google-Extended
 Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+# --- Indexes -------------------------------------------------------------
+# A structured summary for language models is served alongside the sitemap.
+# See https://llmstxt.org for the convention.
 
 Sitemap: https://amey-thakur.github.io/GESTURE-FX/sitemap.xml

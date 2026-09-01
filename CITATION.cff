@@ -10,7 +10,6 @@ authors:
   - given-names: Amey
     family-names: Thakur
     orcid: 'https://orcid.org/0000-0001-5644-1575'
-    affiliation: University of Mumbai
 
 repository-code: 'https://github.com/Amey-Thakur/GESTURE-FX'
 url: 'https://amey-thakur.github.io/GESTURE-FX/'
@@ -40,15 +39,42 @@ abstract: >-
 
 keywords:
   - gesture recognition
+  - hand gesture recognition
   - hand tracking
-  - human computer interaction
-  - real-time video processing
-  - computer vision
+  - finger frame
+  - palm flip detection
+  - gesture triggered video effects
+  - real-time video effects
+  - webcam effects
+  - browser computer vision
+  - client-side computer vision
+  - on-device inference
+  - non-photorealistic rendering
+  - cartoon shader
+  - white-box cartoonization
+  - bilateral filter
+  - difference of Gaussians
   - WebGL
+  - WebGL 2
+  - GLSL
   - MediaPipe
-  - client-side computing
+  - MediaRecorder
+  - getUserMedia
+  - canvas captureStream
+  - TypeScript
+  - WebAssembly
+  - progressive web app
+  - GitHub Pages
   - privacy preserving
-  - web application
+  - no server
+  - open source
+  - zero crossing detection
+  - temporal localisation
+  - human computer interaction
+  - Amey Thakur
+  - ameythakur
+  - amey-thakur
+  - ameyarc
 
 license: MIT
 version: 1.0.0

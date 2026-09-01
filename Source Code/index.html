@@ -28,12 +28,18 @@
     <title>GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser</title>
 
     <meta name="description"
-        content="Flip your hand and the recording glitches. GESTURE-FX detects hand gestures in real time and fires camera effects into the video as it records. Runs entirely in the browser with no server, no upload and no editing.">
+        content="Frame a shot with your hands and the picture inside becomes a cartoon. GESTURE-FX detects hand gestures in real time and composites camera effects into the video as it records, with seven on-device drawing styles. Runs entirely in your browser: no server, no upload, no account and no editing step.">
     <meta name="author" content="Amey Thakur">
     <meta name="keywords"
-        content="gesture recognition, hand tracking, finger frame effect, hand gesture camera effects, cartoon filter, MediaPipe, WebGL, webcam video effects, MediaRecorder, browser computer vision, non-photorealistic rendering, glitch effect, client side">
+        content="gesture recognition, hand gesture recognition, hand tracking, finger frame, finger frame effect, palm flip detection, hand gesture camera effects, gesture triggered video effects, real-time video effects, webcam video effects, cartoon filter, cartoon shader, white-box cartoonization, non-photorealistic rendering, browser computer vision, client-side computer vision, on-device inference, MediaPipe, MediaRecorder, WebGL, WebGL 2, GLSL, getUserMedia, canvas captureStream, TypeScript, WebAssembly, glitch effect, privacy preserving, no server, open source, Amey Thakur, ameythakur, ameyarc">
 
     <link rel="canonical" href="https://amey-thakur.github.io/GESTURE-FX/">
+
+    <!-- A plain-text summary for language models. See https://llmstxt.org -->
+    <link rel="alternate" type="text/plain" href="./llms.txt"
+        title="GESTURE-FX, summarised for language models">
+    <link rel="sitemap" type="application/xml" href="./sitemap.xml">
+    <link rel="author" href="https://github.com/Amey-Thakur">
 
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="apple-touch-icon" href="./favicon.svg">
@@ -44,7 +50,7 @@
     <meta property="og:site_name" content="GESTURE-FX">
     <meta property="og:title" content="GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser">
     <meta property="og:description"
-        content="Flip your hand and the recording glitches. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
+        content="Frame a shot with your hands and the picture inside becomes a cartoon. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
     <meta property="og:url" content="https://amey-thakur.github.io/GESTURE-FX/">
     <meta property="og:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
     <meta property="og:image:width" content="1280">
@@ -53,7 +59,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="GESTURE-FX &middot; Gesture-Triggered Camera Effects in the Browser">
     <meta name="twitter:description"
-        content="Flip your hand and the recording glitches. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
+        content="Frame a shot with your hands and the picture inside becomes a cartoon. Real-time hand gesture detection firing camera effects into the video as it records, entirely on your device.">
     <meta name="twitter:image" content="https://amey-thakur.github.io/GESTURE-FX/social-preview.png">
 
     <!--
@@ -61,36 +67,57 @@
       state what the project is, who wrote it, and that it costs nothing.
     -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "GESTURE-FX",
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Any modern web browser",
-        "url": "https://amey-thakur.github.io/GESTURE-FX/",
-        "description": "A browser application that detects hand gestures in real time and fires camera effects into a video as it records, and that turns the rectangle made by two hands into a window showing the same scene redrawn as a cartoon, a comic, a pencil drawing, a screen print or pen and ink. Runs on the client with no server, no upload and no editing step.",
-        "featureList": [
-            "Two-hand finger frame with seven on-device drawing styles",
-            "Palm-flip detection on the exact frame of the flip",
-            "Effects composited into the recording, with no editing step",
-            "Optional voice control for starting and stopping a take",
-            "Optional face auto-framing",
-            "Optional restyle through a video model, using your own key"
-        ],
-        "author": {
-            "@type": "Person",
-            "name": "Amey Thakur",
-            "url": "https://github.com/Amey-Thakur",
-            "identifier": "https://orcid.org/0000-0001-5644-1575"
-        },
-        "license": "https://opensource.org/licenses/MIT",
-        "codeRepository": "https://github.com/Amey-Thakur/GESTURE-FX",
-        "isAccessibleForFree": true,
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        }
+{
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "@id": "https://amey-thakur.github.io/GESTURE-FX/#app",
+            "name": "GESTURE-FX",
+            "alternateName": "Gesture FX",
+            "applicationCategory": "MultimediaApplication",
+            "applicationSubCategory": "Computer Vision",
+            "operatingSystem": "Any modern web browser",
+            "browserRequirements": "Requires WebGL 2, getUserMedia and MediaRecorder",
+            "url": "https://amey-thakur.github.io/GESTURE-FX/",
+            "inLanguage": "en",
+            "image": "https://amey-thakur.github.io/GESTURE-FX/social-preview.png",
+            "screenshot": "https://amey-thakur.github.io/GESTURE-FX/social-preview.png",
+            "description": "Frame a shot with your hands and the picture inside becomes a cartoon. GESTURE-FX detects hand gestures in real time and composites camera effects into the video as it records, with seven on-device drawing styles. Runs entirely in your browser: no server, no upload, no account and no editing step.",
+            "softwareVersion": "1.0.0",
+            "datePublished": "2026-09-01",
+            "dateModified": "2026-09-01",
+            "featureList": [
+                    "Two-hand finger frame with seven on-device drawing styles",
+                    "Palm-flip detection on the exact frame of the flip",
+                    "Effects composited into the recording, with no editing step",
+                    "A rewind buffer that cuts to earlier frames inside one take",
+                    "Optional voice control for starting and stopping a take",
+                    "Optional face auto-framing",
+                    "Optional restyle through a video model, using your own key"
+            ],
+            "author": {
+                    "@type": "Person",
+                    "@id": "https://orcid.org/0000-0001-5644-1575",
+                    "name": "Amey Thakur",
+                    "url": "https://github.com/Amey-Thakur",
+                    "identifier": "https://orcid.org/0000-0001-5644-1575",
+                    "sameAs": [
+                            "https://github.com/Amey-Thakur",
+                            "https://orcid.org/0000-0001-5644-1575",
+                            "https://scholar.google.com/citations?user=0inooPgAAAAJ",
+                            "https://www.researchgate.net/profile/Amey-Thakur",
+                            "https://arxiv.org/a/thakur_a_3.html"
+                    ]
+            },
+            "license": "https://opensource.org/licenses/MIT",
+            "codeRepository": "https://github.com/Amey-Thakur/GESTURE-FX",
+            "discussionUrl": "https://github.com/Amey-Thakur/GESTURE-FX/discussions",
+            "isAccessibleForFree": true,
+            "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+            },
+            "keywords": "gesture recognition, hand gesture recognition, hand tracking, finger frame, finger frame effect, palm flip detection, hand gesture camera effects, gesture triggered video effects, real-time video effects, webcam video effects, cartoon filter, cartoon shader, white-box cartoonization, non-photorealistic rendering, browser computer vision, client-side computer vision, on-device inference, MediaPipe, MediaRecorder, WebGL, WebGL 2, GLSL, getUserMedia, canvas captureStream, TypeScript, WebAssembly, glitch effect, privacy preserving, no server, open source, Amey Thakur, ameythakur, ameyarc"
     }
     </script>
 

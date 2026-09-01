@@ -3,9 +3,9 @@
 > A browser application that detects hand gestures in real time and fires camera
 > effects into a video while it records, and that turns the rectangle made by two
 > hands into a window showing the same scene redrawn in another medium. It runs
-> on the client: no server, no upload, no key and no editing step. Two optional
-> features use the network and are off until switched on. Open source under the
-> MIT licence, written by Amey Thakur.
+> on the client: no server, no upload and no editing step. Two optional
+> features use the network and a key, and both are off until switched on. Open
+> source under the MIT licence, written by Amey Thakur.
 
 Live application: https://amey-thakur.github.io/GESTURE-FX/
 Repository: https://github.com/Amey-Thakur/GESTURE-FX
@@ -23,9 +23,9 @@ exported file as pixels, so the finished video needs no editing.
 
 Holding both index fingers up and both thumbs across makes a rectangle. The four
 fingertips are the corners of a quadrilateral, and inside it the scene is redrawn
-in one of five media: a flat cel cartoon, a four-plate comic halftone, a pencil
-drawing, a four-ink screen print, or pen and ink. Each is a fragment shader, so
-all of them run at the full frame rate on the device.
+in one of seven media: a flat cel cartoon, oil paint, a four-plate comic
+halftone, a screen print, neon, a pencil drawing, or pen and ink. Each is a
+fragment shader, so all of them run at the full frame rate on the device.
 
 Coverage uses the even-odd rule rather than a triangulation. Crossing the hands
 makes the quadrilateral self-intersecting, at which point a triangle fan covers
@@ -111,13 +111,33 @@ switched off. Recordings are held in page memory and are discarded when the tab
 closes. A supplied API key is held in the tab and written to the device only on
 request.
 
+## Measured, and reproducible in a browser
+
+The detector is evaluated against a seeded synthetic corpus in which the true
+crossing time is known exactly, and the evaluation is published rather than
+described: https://amey-thakur.github.io/GESTURE-FX/evaluation.html runs the
+shipped modules in the reader's own browser and prints the table.
+
+- 95.0 per cent of palm flips detected across 360 generated sequences
+- 0 false positives across 240 near-miss sequences, including held edge-on
+  poses, wobble, rotating fists, and hands entering the frame mid-turn
+- Mean localisation error 6.7 ms, a sixth of the 41.7 ms interval between two
+  tracking frames; median 4.0 ms
+- The zero is interpolated between the two samples that bracket it, which took
+  the mean error from 33.4 ms to 6.7 ms and removed a 30 ms bias
+
+The corpus is generated rather than filmed because the crossing frame is not
+observable in video to a precision finer than the error being measured. The
+figures therefore bound the detector's own error and exclude the landmark
+estimator's.
+
 ## Documentation
 
 - docs/SPECIFICATION.md, the feasibility study, architecture and limitations
 - docs/GESTURES.md, the detection derivation and how to add a gesture
 - docs/EFFECTS.md, how to add an effect or a filter
 - docs/BROWSER-SUPPORT.md, the tested device matrix and the known defects
-- PRIVACY.md, what is processed and what is stored
+- docs/PRIVACY.md, what is processed and what is stored
 
 ## Preprint
 
