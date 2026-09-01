@@ -560,6 +560,40 @@ One file and one line, by construction.
 <br>
 <br>
 
+## Two cards, two readers
+
+The repository is two things depending on who arrives at it, so the preview is
+drawn twice. Both come from one script, share one ground, one mark and one
+header, and neither carries a badge or a URL: a licence shield costs a reader
+attention and tells them nothing about the software.
+
+<div align="center">
+<br>
+<img src="docs/screenshots/social_preview.png" alt="The GESTURE-FX preview card: a camera frame followed by the same frame redrawn as cartoon, paint, comic, poster, neon, sketch and ink" width="900">
+<br>
+<em><strong>What it looks like.</strong> The camera frame, then the same frame in all seven media, cropped from the contact sheet the style harness writes. The card cannot advertise a look the shaders do not produce, and a reader who counts the tiles arrives at the number the card claims.</em>
+<br><br>
+<br>
+<img src="docs/screenshots/social_preview_method.png" alt="The method card: the signal s of theta falling from positive to negative, eight sampled instants, and the interpolated zero between the two that bracket it" width="900">
+<br>
+<em><strong>What the idea is.</strong> The scalar the detector watches, falling from palm-on to back-on; the instants the tracker actually observes; and the crossing it reports, which lies between the two nearest samples and on neither.</em>
+<br><br>
+</div>
+
+Both are rebuilt from the contact sheet by one command, so a measured figure
+printed on a card changed because it changed in the evaluation:
+
+```bash
+python scripts/make-social-preview.py
+```
+
+> [!NOTE]
+> Both live in [`.github/`](.github/). The first is the repository's preview. The second is for writing **about the method** rather than about the output, and is the one to reach for when the audience already knows what a shader does.
+
+<br>
+<br>
+<br>
+
 ## Built with
 
 TypeScript, no framework, one runtime dependency. WebGL 2. The browser's own encoder. Vite builds it and reaches nothing. Actions type-checks, builds and deploys on every push.
