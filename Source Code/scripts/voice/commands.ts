@@ -190,7 +190,16 @@ export class VoiceCommands {
     /** Set between `onstart` and `onend`, which is when results can arrive. */
     private live = false;
 
-    private lastCommandAt = 0;
+    /**
+     * When the last command fired, for the hold-off.
+     *
+     * Negative infinity rather than zero, because zero is a real instant on the
+     * performance clock and means "a command fired as the page loaded". That
+     * suppressed every command for the first cooldown after load, which is a
+     * window a user can easily be inside and which made the behaviour depend on
+     * how fast the page happened to start.
+     */
+    private lastCommandAt = Number.NEGATIVE_INFINITY;
 
     /** Consecutive failures, used to give up rather than restart forever. */
     private failures = 0;

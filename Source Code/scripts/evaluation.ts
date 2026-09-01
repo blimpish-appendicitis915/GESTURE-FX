@@ -534,13 +534,32 @@ function render(results: ClassResult[]): void {
             criterion, and raising the tracking rate is the only thing that moves it.
         </p>
 
-        <p style="margin-top:var(--space-6)">
-            The corpus is generated, not filmed, because the true crossing frame is not
-            observable in footage. The figures therefore measure the criterion and its
-            gating, not the landmark estimator, which is modelled here as unbiased noise
-            of constant variance and is neither. A real hand also deforms as it turns,
-            which a rigid model does not.
-        </p>
+        <div class="alert alert--important">
+            <span class="alert__label">What these figures do not measure</span>
+            <p>
+                The corpus is generated, not filmed, because the true crossing frame is not
+                observable in footage to a precision finer than the error being measured.
+                These figures therefore measure the criterion and its gating, and not the
+                landmark estimator, which is modelled here as unbiased noise of constant
+                variance and is neither. A real hand also deforms as it turns, which a rigid
+                model does not.
+            </p>
+            <p>
+                Read them as a floor on the detector's own error rather than as a prediction
+                of field performance. The gap between the two is the estimator's contribution.
+            </p>
+        </div>
+
+        <div class="alert alert--tip">
+            <span class="alert__label">Check it rather than take it</span>
+            <p>
+                Every number above comes from
+                <a href="https://github.com/Amey-Thakur/GESTURE-FX/blob/main/Source%20Code/scripts/evaluation.ts">one file</a>,
+                which imports the shipped detector rather than a copy of it. Change the
+                sensitivity, the noise or the tracking rate in that file and the table
+                changes with it.
+            </p>
+        </div>
     `;
 }
 

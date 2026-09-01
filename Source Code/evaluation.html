@@ -145,6 +145,153 @@
             overflow: visible;
         }
 
+
+        /* --- Masthead ---------------------------------------------------- */
+
+        .masthead {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding-bottom: var(--space-5);
+            border-bottom: 1px solid var(--line-subtle);
+        }
+
+        .masthead__mark {
+            width: 34px;
+            height: 34px;
+        }
+
+        .masthead__name {
+            font-family: var(--font-display);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            letter-spacing: var(--tracking-caps);
+            text-transform: uppercase;
+            color: var(--text-strong);
+        }
+
+        .masthead__links {
+            margin-left: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 var(--space-3);
+
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+
+            font-size: var(--text-xs);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-secondary);
+            text-decoration: none;
+
+            transition:
+                border-color var(--duration-fast) var(--ease-out),
+                color var(--duration-fast) var(--ease-out);
+        }
+
+        a.badge:hover {
+            border-color: var(--line-strong);
+            color: var(--text-strong);
+        }
+
+        .badge--accent {
+            border-color: transparent;
+            background: var(--brand-gradient);
+            color: var(--on-accent);
+        }
+
+        .lede {
+            font-size: var(--text-base);
+            color: var(--text-primary);
+        }
+
+        /* --- Alerts ------------------------------------------------------- */
+
+        /*
+         * The same five kinds the repository's documents use, so a reader who
+         * has read those recognises the weight of each without a legend. The
+         * colour carries the left edge and the label; the body stays readable
+         * text rather than coloured text on a coloured field.
+         */
+        .alert {
+            margin: var(--space-5) 0;
+            padding: var(--space-3) var(--space-4);
+
+            border: 1px solid var(--line-subtle);
+            border-left: 3px solid var(--line-strong);
+            border-radius: var(--radius-sm);
+            background-color: var(--ink-850);
+        }
+
+        .alert p {
+            margin: 0;
+        }
+
+        .alert p + p {
+            margin-top: var(--space-2);
+        }
+
+        .alert__label {
+            display: block;
+            margin-bottom: var(--space-1);
+
+            font-size: var(--text-xs);
+            font-weight: 700;
+            letter-spacing: var(--tracking-caps);
+            text-transform: uppercase;
+        }
+
+        .alert--note { border-left-color: var(--cyan-400); }
+        .alert--note .alert__label { color: var(--cyan-300); }
+
+        .alert--tip { border-left-color: var(--success); }
+        .alert--tip .alert__label { color: var(--success); }
+
+        .alert--important { border-left-color: var(--magenta-400); }
+        .alert--important .alert__label { color: var(--magenta-300); }
+
+        .alert--warning { border-left-color: var(--warning); }
+        .alert--warning .alert__label { color: var(--warning); }
+
+        /* --- Colophon ------------------------------------------------------ */
+
+        .colophon {
+            margin-top: var(--space-8);
+            padding-top: var(--space-5);
+            border-top: 1px solid var(--line-subtle);
+
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--space-3);
+
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+
+        .colophon a {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 620px) {
+            .masthead {
+                flex-wrap: wrap;
+            }
+
+            .masthead__links {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
         .sheet {
             max-width: 940px;
             margin: 0 auto;
@@ -167,11 +314,15 @@
             margin: var(--space-7) 0 var(--space-3);
         }
 
+        /*
+         * No measure cap. A paragraph set to 68 characters beside a table set to
+         * the full sheet gives the column two different widths and a ragged
+         * right edge against every rule. The sheet itself is the measure.
+         */
         p {
             color: var(--text-secondary);
             font-size: var(--text-sm);
-            line-height: var(--leading-normal);
-            max-width: 68ch;
+            line-height: var(--leading-relaxed, 1.7);
         }
 
         table {
@@ -223,17 +374,53 @@
 
 <body>
     <main class="sheet">
+        <header class="masthead">
+            <img class="masthead__mark" src="./favicon.svg" alt="" width="34" height="34">
+            <span class="masthead__name">Gesture&#8209;FX</span>
+
+            <nav class="masthead__links" aria-label="Elsewhere">
+                <a class="badge badge--accent" href="./">Open the application</a>
+                <a class="badge" href="https://github.com/Amey-Thakur/GESTURE-FX">Repository</a>
+                <a class="badge" href="https://github.com/Amey-Thakur/GESTURE-FX/blob/main/docs/GESTURES.md">The derivation</a>
+                <a class="badge" href="https://github.com/Amey-Thakur/GESTURE-FX/blob/main/LICENSE">MIT</a>
+            </nav>
+        </header>
+
         <h1>Palm-flip detector: measured error</h1>
 
-        <p>
+        <p class="lede">
             A rigid hand is rotated about its own long axis by a known angle at a known
             rate, projected orthographically and perturbed by landmark noise. The instant
             the rotation passes ninety degrees is therefore known exactly, and the
-            detector's report is compared against it. Every module used here is the one
-            the application runs.
+            detector's report is compared against it.
         </p>
 
+        <div class="alert alert--note">
+            <span class="alert__label">Nothing here is precomputed</span>
+            <p>
+                The figures below were produced in this tab, just now, by the same modules
+                the application runs. Reload the page and they are computed again. The
+                corpus is seeded, so the numbers are reproducible rather than merely
+                repeatable.
+            </p>
+        </div>
+
         <div data-role="report">Running…</div>
+
+        <footer class="colophon">
+            <span>
+                Built by
+                <a href="https://github.com/Amey-Thakur">Amey Thakur</a>.
+                Open source under the MIT licence.
+            </span>
+            <span style="margin-left:auto">
+                <a href="./">Application</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://github.com/Amey-Thakur/GESTURE-FX">Source</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://orcid.org/0000-0001-5644-1575">ORCID</a>
+            </span>
+        </footer>
     </main>
 
     <script type="module" src="./scripts/evaluation.ts"></script>

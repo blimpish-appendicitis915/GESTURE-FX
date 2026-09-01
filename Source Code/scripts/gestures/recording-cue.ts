@@ -38,8 +38,10 @@
  * of those shapes are momentarily a ring. Requiring the pose to persist for a
  * fixed time turns a shape the hand passes through into a shape the hand is
  * put into, which is the difference between a control and a hazard. The hold
- * is measured on the frames themselves rather than on a timer, so a dropped
- * frame breaks it rather than being counted as agreement.
+ * is counted in observed frames as well as elapsed time, so a pose cannot be
+ * inferred from two sightings far apart. A frame on which the tracker made no
+ * observation at all is neither: it is skipped, because the alternative is a
+ * hold that the tracker's own rate limit resets before it can complete.
  *
  * Why there is a lock-out after firing
  * -----------------------------------
@@ -109,7 +111,16 @@ export class RecordingCueDetector {
      * recording cannot start a second take.
      */
     update(tracking: TrackingFrame | null, now: number, recording: boolean): RecordingCue | null {
-        if (!tracking || tracking.hands.length === 0) {
+        // A null frame is the tracker staying inside its rate budget, not the
+        // hand leaving. Inference is capped at 24 Hz while this is called at the
+        // display refresh rate, so most frames are null; treating one as an
+        // absence clears the hold several times a second and makes it
+        // unreachable. Nothing is observed, so nothing changes.
+        if (!tracking) {
+            return null;
+        }
+
+        if (tracking.hands.length === 0) {
             this.pose = null;
             this.frames = 0;
 

@@ -1230,7 +1230,19 @@ export class Application {
             // recogniser has the device. Permission is already granted by this
             // point, so this does not prompt.
             if (this.microphoneEnabled) {
-                await this.microphone.open();
+                const state = await this.microphone.open();
+
+                // Said before the take rather than discovered after it. A
+                // silent recording is not recoverable, and the user is the only
+                // one who can do anything about a refused microphone.
+                if (state !== 'granted') {
+                    this.toast.show(
+                        'No microphone',
+                        state === 'denied'
+                            ? 'permission was refused, so this take will have no sound'
+                            : 'this browser offers no microphone, so this take will have no sound',
+                    );
+                }
             }
 
             await this.recorder.start(this.shell.canvas, {
@@ -1240,6 +1252,13 @@ export class Application {
             this.recorder = null;
             this.fail(error, 'Recording could not start');
             return;
+        }
+
+        // The recorder reports what it actually attached, which is the only
+        // statement about sound that is worth making: a track can be requested,
+        // granted, and still not reach the encoder.
+        if (this.microphoneEnabled && !this.recorder.hasAudio) {
+            this.toast.show('No sound', 'the microphone did not reach the recorder, so this take is silent');
         }
 
         this.shell.timer.textContent = formatDuration(0);
