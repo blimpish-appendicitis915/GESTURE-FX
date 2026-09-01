@@ -126,7 +126,7 @@ interface SpeechRecognitionLike extends EventTarget {
 
 interface SpeechRecognitionResultEventLike {
     resultIndex: number;
-    results: ArrayLike<ArrayLike<{ transcript: string }>>;
+    results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }>;
 }
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
@@ -143,6 +143,19 @@ function constructor(): SpeechRecognitionConstructor | null {
 /** Whether this browser implements the interface at all. */
 export function isVoiceSupported(): boolean {
     return constructor() !== null;
+}
+
+/**
+ * The language to recognise in.
+ *
+ * English, because the phrases are English. The browser's own setting is used
+ * when it is an English variant, so a British or Indian English speaker gets the
+ * model trained for them rather than an American one.
+ */
+export function recognitionLanguage(): string {
+    const preferred = (typeof navigator !== 'undefined' && navigator.language) || '';
+
+    return /^en(-|$)/i.test(preferred) ? preferred : VOICE.language;
 }
 
 /**
@@ -199,6 +212,7 @@ export class VoiceCommands {
         private readonly onCommand: VoiceCommandHandler,
         private readonly onState: VoiceStateHandler,
         private readonly onError: VoiceErrorHandler,
+        private readonly onUnmatched: (transcript: string) => void = () => {},
     ) {}
 
     get isListening(): boolean {
@@ -232,7 +246,7 @@ export class VoiceCommands {
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
         this.recognition.maxAlternatives = 1;
-        this.recognition.lang = navigator.language || 'en-US';
+        this.recognition.lang = recognitionLanguage();
 
         this.recognition.onstart = () => {
             this.live = true;
@@ -411,7 +425,8 @@ export class VoiceCommands {
         }
 
         for (let i = event.resultIndex; i < event.results.length; i += 1) {
-            const spoken = event.results[i]?.[0]?.transcript;
+            const result = event.results[i];
+            const spoken = result?.[0]?.transcript;
 
             if (!spoken) {
                 continue;
@@ -425,6 +440,15 @@ export class VoiceCommands {
                 this.captureFailures = 0;
                 this.onCommand(command);
                 return;
+            }
+
+            // A finished utterance that matched nothing is reported rather than
+            // dropped. Without this the only difference between "misheard" and
+            // "not listening" is invisible, which is the state this feature was
+            // in when it was reported broken. Interim results are skipped: they
+            // change on every syllable and would be noise.
+            if (result?.isFinal) {
+                this.onUnmatched(spoken.trim());
             }
         }
     }

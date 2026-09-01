@@ -128,9 +128,18 @@
          * overlays scroll, which is correct for a camera interface and wrong for
          * a document. This page is a document, so it takes its height from its
          * content and scrolls in the ordinary way.
+         *
+         * The override wins on specificity rather than on order, and that is
+         * deliberate. The bundler hoists the built stylesheet into a link tag
+         * immediately before the closing head tag, which places it after this
+         * block however the source is written. An override that relied on
+         * coming last therefore worked in development and was silently
+         * discarded in the build. :root matches the same html element and adds
+         * a class-level component, so these two selectors outrank the plain
+         * element selectors in base.css wherever either sheet ends up.
          */
-        html,
-        body {
+        html:root,
+        html:root > body {
             height: auto;
             min-height: 100%;
             overflow: visible;

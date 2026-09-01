@@ -428,6 +428,20 @@ export const VOICE = {
      */
     restartDelayMs: 250,
 
+    /**
+     * The language the recogniser is asked to listen in.
+     *
+     * Every command is an English word, so the recogniser has to be listening
+     * for English. Following the browser's own setting looks respectful and is
+     * wrong: on a browser configured for another language the service returns
+     * a faithful transcript in that language, nothing matches, and the feature
+     * fails silently and completely.
+     *
+     * The browser's setting is still preferred when it is an English variant,
+     * so that en-GB and en-IN keep their own acoustic models.
+     */
+    language: 'en-US',
+
     /** Consecutive failures after which listening is abandoned. */
     maximumFailures: 4,
 

@@ -165,6 +165,11 @@ export class Application {
         (message) => {
             this.toast.show('Voice control', message);
         },
+        (transcript) => {
+            // Shown so that "heard the wrong words" and "heard nothing at all"
+            // are distinguishable from the outside.
+            this.toast.show('Heard', `“${transcript}”, which is not a command`);
+        },
     );
 
     // --- State ----------------------------------------------------------

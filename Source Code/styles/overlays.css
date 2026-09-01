@@ -351,6 +351,43 @@
         width: 100%;
         min-width: 0;
     }
+
+    /*
+     * A wide control wraps here instead of dividing.
+     *
+     * Seven options sharing the width of a phone leaves each about forty pixels,
+     * which is narrower than the words they carry, so the labels crush together
+     * and the tooltip has almost nothing to anchor to. Dividing the width is
+     * right on a desktop, where there is enough of it, and wrong here.
+     *
+     * The options therefore take a legible width and wrap onto a second line,
+     * centred so the shorter line reads as deliberate rather than ragged. The
+     * container loses its pill radius at the same time, because a pill drawn
+     * around two rows is not a pill.
+     */
+    .setting--wide .segmented {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-1);
+
+        padding: var(--space-1);
+        border-radius: var(--radius-md);
+    }
+
+    /*
+     * Three to a line, every one the same width.
+     *
+     * The basis is a third of the track less its share of the two gaps, so the
+     * options tile it exactly. They are not allowed to grow: a growing option
+     * lets the last row stretch one control across the full width, which looks
+     * like a mistake rather than a row of three.
+     */
+    .setting--wide .segmented__option {
+        flex: 0 0 calc(33.333% - 3px);
+        min-width: 0;
+        padding: 0 var(--space-2);
+        letter-spacing: var(--tracking-caps);
+    }
 }
 
 /* --- Countdown ---------------------------------------------------------- */
