@@ -24,6 +24,16 @@ Entirely in the browser.
 
 </div>
 
+**Jump to:**
+[The finger frame](#the-finger-frame) &nbsp;·&nbsp;
+[Gestures](#gestures-and-effects) &nbsp;·&nbsp;
+[The method](#the-instant-not-the-interval) &nbsp;·&nbsp;
+[Evaluation](#measured-not-asserted) &nbsp;·&nbsp;
+[Architecture](#architecture) &nbsp;·&nbsp;
+[Privacy](#privacy) &nbsp;·&nbsp;
+[Run it](#run-it) &nbsp;·&nbsp;
+[Paper](paper/)
+
 <br>
 <br>
 <br>
@@ -560,35 +570,25 @@ One file and one line, by construction.
 <br>
 <br>
 
-## Two cards, two readers
+## Preview cards
 
-The repository is two things depending on who arrives at it, so the preview is
-drawn twice. Both come from one script, share one ground, one mark and one
-header, and neither carries a badge or a URL: a licence shield costs a reader
-attention and tells them nothing about the software.
+Two of them, in [`.github/`](.github/). Take either if you are writing about this.
 
 <div align="center">
 <br>
-<img src="docs/screenshots/social_preview.png" alt="The GESTURE-FX preview card: a camera frame followed by the same frame redrawn as cartoon, paint, comic, poster, neon, sketch and ink" width="900">
+<img src="docs/screenshots/social_preview.png" alt="A camera frame beside the same frame redrawn as cartoon, paint, comic, poster, neon, sketch and ink" width="900">
 <br>
-<em><strong>What it looks like.</strong> The camera frame, then the same frame in all seven media, cropped from the contact sheet the style harness writes. The card cannot advertise a look the shaders do not produce, and a reader who counts the tiles arrives at the number the card claims.</em>
+<em>Every medium the window draws, beside the camera frame they come from.</em>
 <br><br>
 <br>
-<img src="docs/screenshots/social_preview_method.png" alt="The method card: the signal s of theta falling from positive to negative, eight sampled instants, and the interpolated zero between the two that bracket it" width="900">
+<img src="docs/screenshots/social_preview_method.png" alt="The palm flip signal falling from positive to negative past eight sampled instants, with the reported crossing lying between the two nearest" width="900">
 <br>
-<em><strong>What the idea is.</strong> The scalar the detector watches, falling from palm-on to back-on; the instants the tracker actually observes; and the crossing it reports, which lies between the two nearest samples and on neither.</em>
+<em>The palm flip signal. It falls as the hand turns, and the flip is where it crosses zero.</em>
 <br><br>
 </div>
 
-Both are rebuilt from the contact sheet by one command, so a measured figure
-printed on a card changed because it changed in the evaluation:
-
-```bash
-python scripts/make-social-preview.py
-```
-
-> [!NOTE]
-> Both live in [`.github/`](.github/). The first is the repository's preview. The second is for writing **about the method** rather than about the output, and is the one to reach for when the audience already knows what a shader does.
+The first is the repository preview. The second suits anything about the method.
+Rebuild both with `python scripts/make-social-preview.py`.
 
 <br>
 <br>
