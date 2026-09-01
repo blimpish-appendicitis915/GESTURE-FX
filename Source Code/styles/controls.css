@@ -668,6 +668,16 @@
  * cannot be mistaken for part of the recorded effect.
  */
 .toast {
+    /*
+     * Bounded by the frame it sits in. This is a flex item, and a flex item
+     * will not shrink below its own content, so an unbounded line of text runs
+     * out of both sides of the viewfinder and is clipped there. Measured on a
+     * 416 pixel screen, a device message laid out 465 wide inside a 264 wide
+     * frame. Gesture confirmations are two words and always fit, which is why
+     * the fault only showed on the sentences worth reading.
+     */
+    max-width: 100%;
+    min-width: 0;
     padding: var(--space-2) var(--space-4);
 
     border: 1px solid var(--line);
@@ -678,8 +688,10 @@
 
     font-size: var(--text-sm);
     font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    text-wrap: pretty;
     color: var(--text-strong);
-    white-space: nowrap;
 
     opacity: 0;
     transition: opacity var(--duration-base) var(--ease-out);

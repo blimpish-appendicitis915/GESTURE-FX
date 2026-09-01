@@ -20,7 +20,7 @@
 
 import { Application } from './app/application';
 import { initialiseTheme } from './ui/theme';
-import { toPresentableError } from './ui/overlays';
+import { isObserverCascadeNotice, toPresentableError } from './ui/overlays';
 
 /**
  * Presents a failure that escaped the application.
@@ -82,5 +82,13 @@ if (document.readyState === 'loading') {
     boot();
 }
 
-window.addEventListener('error', (event) => presentFatalError(event.error));
+window.addEventListener('error', (event) => {
+    // The browser's notice about cascading observers is not a failure and has
+    // no remedy to offer, so it does not get the failure screen.
+    if (isObserverCascadeNotice(event)) {
+        return;
+    }
+
+    presentFatalError(event.error);
+});
 window.addEventListener('unhandledrejection', (event) => presentFatalError(event.reason));

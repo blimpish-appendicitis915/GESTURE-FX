@@ -393,12 +393,18 @@ export const RECORDING_GESTURES = {
     /**
      * Frames the pose must be seen on, as well as the elapsed time.
      *
-     * Time alone is satisfied by two frames far apart with a dropout between
-     * them, which is exactly the case a held pose should not be inferred from.
-     * At 24 Hz a 750 ms hold is eighteen frames, so twelve leaves room for a
-     * few misses without accepting a gap.
+     * Time alone is satisfied by two frames far apart, which is not a held
+     * pose. This is the floor that rules that out.
+     *
+     * It is deliberately low. The stop pose is performed while recording, when
+     * the same loop is compositing and encoding and the observed tracking rate
+     * falls well below its 24 Hz cap; a floor of twelve inside 750 ms demands 16
+     * Hz sustained and is unreachable on a busy frame. Continuity is what
+     * actually does the work here, and it is enforced elsewhere: any observed
+     * frame without the pose resets the hold. Six is enough to exclude a pair of
+     * distant sightings without excluding a slow device.
      */
-    minimumFrames: 12,
+    minimumFrames: 6,
 
     /**
      * How long after firing before another cue is accepted.

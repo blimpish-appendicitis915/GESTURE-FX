@@ -178,6 +178,23 @@ export function isOpenPalm(features: HandFeatures): boolean {
     return features.extendedCount >= 4 && features.spread > 0.9;
 }
 
+/**
+ * The flat raised hand that ends a recording.
+ *
+ * Deliberately not `isOpenPalm`. That predicate is written for the palm push,
+ * where the hand is presented to the lens with the fingers deliberately spread,
+ * and its 0.9 span separation is right for that. A hand raised to stop something
+ * is flatter and its fingers sit closer together, and at 0.9 it is rejected.
+ *
+ * Loosening the shared predicate would make the palm push fire more easily as
+ * well, so this is its own threshold. The two remain disjoint from the ring by
+ * construction: a ring curls the index down to the thumb and leaves three
+ * fingers up, and four extended fingers is more than that.
+ */
+export function isStopPalm(features: HandFeatures): boolean {
+    return features.extendedCount >= 4 && features.spread > 0.7;
+}
+
 /** Every finger curled into the palm. */
 export function isFist(features: HandFeatures): boolean {
     const { extension } = features;

@@ -130,6 +130,15 @@ const STEPS: readonly Step[] = [
     },
 ];
 
+/**
+ * Space left between the foot of the frame and the top of the card.
+ *
+ * Without it the correction lands them flush, and two rounded edges meeting
+ * with nothing between them read as one stuck shape. Twelve is the third step
+ * of the spacing scale the rest of the interface is built on.
+ */
+const COACH_GAP = 12;
+
 export class Tutorial {
     private index = 0;
     private open = false;
@@ -140,6 +149,15 @@ export class Tutorial {
     private loudSince = 0;
 
     private lastHeard = '';
+
+    /**
+     * Watches the card, whose height changes with each step's wording, and the
+     * stage, whose height changes with the screen.
+     */
+    private sizes: ResizeObserver | null = null;
+
+    /** A pending frame in which to write the reserve, if one is booked. */
+    private booked = 0;
 
     constructor(
         private readonly root: HTMLElement,
@@ -164,8 +182,11 @@ export class Tutorial {
         this.open = true;
 
         this.root.hidden = false;
+        document.documentElement.dataset.coach = 'open';
+
         this.handlers.onOpen();
         this.render();
+        this.watchSize();
     }
 
     close(): void {
@@ -175,7 +196,117 @@ export class Tutorial {
 
         this.open = false;
         this.root.hidden = true;
+
+        this.unwatchSize();
+        delete document.documentElement.dataset.coach;
+        document.documentElement.style.removeProperty('--coach-reserve');
+
         this.handlers.onClose();
+    }
+
+    /**
+     * Reserves room at the foot of the stage so the frame ends where the card
+     * begins.
+     *
+     * The target is the cell the frame is measured in, not the stage. The
+     * strips sit inside the stage below that cell and the cell is centred in
+     * what remains, so the stage's own bottom edge is far below the picture and
+     * aiming at it takes hundreds of pixels that were never in the way.
+     *
+     * The cell is the stage's only flexible row, so it absorbs the whole of any
+     * padding placed on the stage: a pixel of padding moves its foot by exactly
+     * a pixel. That makes this a correction rather than a guess. Read what is
+     * applied, add the amount the cell currently overshoots the card by, and
+     * the result is the answer; on the next evaluation the overshoot is zero
+     * and the value stands.
+     */
+    private reserveSpace(): void {
+        const card = this.root.firstElementChild;
+        const stage = document.querySelector('.stage');
+        const cell = document.querySelector('.stage__viewport');
+
+        if (!(card instanceof HTMLElement)
+            || !(stage instanceof HTMLElement)
+            || !(cell instanceof HTMLElement)) {
+            return;
+        }
+
+        // What the stylesheet is applying right now, which is zero on the
+        // screens where the card is docked beside the picture instead.
+        const applied = Number.parseFloat(getComputedStyle(stage).paddingBottom) || 0;
+        const overshoot = cell.getBoundingClientRect().bottom
+            - card.getBoundingClientRect().top
+            + COACH_GAP;
+
+        /*
+         * Bounded, because below a certain height nothing fits. On a 560 pixel
+         * screen the unbounded figure left the frame too small to see a hand
+         * in, which is a worse outcome than a panel that overlaps its foot.
+         * On any screen with room for both, the cap is far above what is asked
+         * for and has no effect.
+         */
+        const reserve = Math.min(
+            Math.max(0, Math.round(applied + overshoot)),
+            Math.round(stage.getBoundingClientRect().height / 3),
+        );
+
+        document.documentElement.style.setProperty('--coach-reserve', `${reserve}px`);
+    }
+
+    private watchSize(): void {
+        this.reserveSpace();
+
+        if (!('ResizeObserver' in window)) {
+            return;
+        }
+
+        this.sizes = new ResizeObserver(() => this.bookReserve());
+
+        const card = this.root.firstElementChild;
+        const stage = document.querySelector('.stage');
+
+        if (card instanceof HTMLElement) {
+            this.sizes.observe(card);
+        }
+
+        // Safe to watch even though the padding is written into it: the stage
+        // sits in a fixed grid row, so its border box is unmoved by its own
+        // padding and this cannot feed back on itself.
+        if (stage instanceof HTMLElement) {
+            this.sizes.observe(stage);
+        }
+    }
+
+    /**
+     * Defers the write to the next frame.
+     *
+     * Writing the padding from inside the observer's own callback resizes the
+     * frame's cell while the browser is still delivering that round of
+     * observations, and the cell's observer is then due in the same round. The
+     * engine calls that a cascade, defers what it cannot deliver and says so on
+     * the window. Moving the write into the next frame puts the two deliveries
+     * in separate rounds, and one frame is imperceptible against a panel the
+     * user is reading.
+     */
+    private bookReserve(): void {
+        if (this.booked) {
+            return;
+        }
+
+        this.booked = requestAnimationFrame(() => {
+            this.booked = 0;
+            this.reserveSpace();
+        });
+    }
+
+    private unwatchSize(): void {
+        this.sizes?.disconnect();
+        this.sizes = null;
+
+        if (this.booked) {
+            cancelAnimationFrame(this.booked);
+            this.booked = 0;
+        }
     }
 
     /** Marks the current step done and moves on. */

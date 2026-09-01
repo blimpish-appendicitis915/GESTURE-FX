@@ -1099,3 +1099,148 @@
 
 .tutorial__outcome[data-outcome='passed'] { color: var(--success); }
 .tutorial__outcome[data-outcome='skipped'] { color: var(--text-muted); }
+
+/*
+ * The walkthrough is not modal.
+ *
+ * It asks the user to perform something in front of the camera, so covering the
+ * camera defeats it. No scrim, no blur, and pointer events pass through
+ * everywhere except the card itself, which keeps the viewfinder live and the
+ * controls reachable while the walkthrough is open.
+ */
+.overlay--coach {
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    place-items: end center;
+    padding: var(--space-4);
+    pointer-events: none;
+}
+
+.overlay--coach > .card {
+    pointer-events: auto;
+    width: min(420px, 100%);
+
+    /* Opaque rather than translucent: it sits over moving video. */
+    background-color: var(--ink-900);
+    box-shadow: var(--shadow-lg, 0 18px 48px rgb(0 0 0 / 0.55));
+}
+
+/*
+ * Below the docking breakpoint the card sits at the foot of the screen, and the
+ * room left for the rest of the application is decided by how tall it is. The
+ * stage gives up exactly that much, so the picture ends where the panel begins
+ * rather than continuing behind it.
+ *
+ * The amount is measured in scripts/ui/tutorial.ts and arrives as a property,
+ * because it is the difference between two runtime heights and CSS can ask for
+ * neither. It is applied as stage padding rather than as a frame height so the
+ * viewfinder's own observer does the resizing, and it is zero on screens where
+ * the control bar below already absorbs the card.
+ */
+@media (max-width: 1239px) {
+    :root[data-coach='open'] .stage {
+        padding-bottom: var(--coach-reserve, 0px);
+    }
+}
+
+/*
+ * On a phone the card is under the viewfinder, so every pixel it occupies is a
+ * pixel of the picture it covers. The standing paragraph goes: the step below
+ * it says the same thing in the imperative, and that is the line being read.
+ * Dropping it is what lets the rest fit without an inner scrollbar.
+ */
+@media (max-width: 620px) {
+    .overlay--coach {
+        padding: var(--space-3);
+    }
+
+    .overlay--coach > .card {
+        padding: var(--space-4);
+    }
+
+    .overlay--coach .card__body {
+        display: none;
+    }
+
+    .overlay--coach .card__title {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-2);
+    }
+
+    .overlay--coach .tutorial {
+        margin: 0 0 var(--space-2);
+    }
+
+    /*
+     * The small-screen rule gives every dialog button a row of its own, which
+     * is right for a modal that owns the screen. This panel does not own the
+     * screen: it shares it with the picture the user is being asked to watch,
+     * and two stacked buttons stand 100 tall where a pair side by side stands
+     * 44. Those 56 pixels are the difference between covering the foot of the
+     * frame and clearing it.
+     */
+    .overlay--coach .card__actions {
+        margin-top: var(--space-4);
+        gap: var(--space-2);
+    }
+
+    .overlay--coach .card__actions .button {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+/*
+ * With room either side of the viewfinder, the card goes beside it rather than
+ * under it, so nothing at all is covered.
+ */
+@media (min-width: 1240px) {
+    .overlay--coach {
+        place-items: center start;
+    }
+
+    /*
+     * Narrow enough to clear the viewfinder rather than clip its left edge.
+     * The breakpoint is where the gap beside a portrait preview is wide enough
+     * to hold this; below it the card goes underneath instead, where it covers
+     * the control strips and not the picture.
+     */
+    .overlay--coach > .card {
+        width: 296px;
+        max-height: min(78vh, 720px);
+        overflow-y: auto;
+        margin-left: var(--space-4);
+    }
+}
+
+/* What the tracker can see right now, so a stalled step explains itself. */
+.tutorial__watch {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-subtle);
+
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.tutorial__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    flex: 0 0 auto;
+}
+
+.tutorial__watch[data-seen='true'] .tutorial__dot {
+    background-color: var(--success);
+}
+
+.tutorial__watch[data-seen='true'] {
+    color: var(--text-secondary);
+}

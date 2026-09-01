@@ -209,6 +209,16 @@ export class Application {
      * who did not want sound one press, before or after the fact.
      */
     private microphoneEnabled = true;
+
+    /**
+     * Whether the user wants sound, as distinct from whether they can have it.
+     *
+     * `microphoneEnabled` is the achievable state and goes false when the device
+     * is refused. Guarding the warning on that flag meant the one case that most
+     * needed explaining, a refusal, produced no message: the flag was already
+     * false, so nothing was attempted and nothing was said.
+     */
+    private wantsSound = true;
     private recordingSupport: RecordingSupport = { supported: false, mimeType: null };
     private clip: RecordedClip | null = null;
     private lastHandSeenAt = 0;
@@ -848,6 +858,7 @@ export class Application {
         }
 
         this.microphoneEnabled = turningOn;
+        this.wantsSound = turningOn;
         this.reflectMicrophoneState();
     }
 
@@ -889,8 +900,17 @@ export class Application {
         // speech recognition wants the same microphone, and holding it for the
         // whole session takes it from the recogniser. A refusal is recorded and
         // does not stop the session.
-        await this.microphone.prime();
+        const microphone = await this.microphone.prime();
         this.reflectMicrophoneState();
+
+        if (this.wantsSound && microphone !== 'granted') {
+            this.toast.show(
+                'No microphone',
+                microphone === 'denied'
+                    ? 'permission was refused, so recordings will be silent until it is allowed'
+                    : 'this browser offers none, so recordings will be silent',
+            );
+        }
 
         this.setState('loading');
 
@@ -1006,6 +1026,23 @@ export class Application {
         if (!this.tutorial.isOpen) {
             return;
         }
+
+        this.shell.tutorialWatch.hidden = this.tutorial.current === null;
+
+        if (this.tutorial.current === null) {
+            return;
+        }
+
+        // What the tracker can see, reported every frame. A step that is not
+        // passing is nearly always a hand the camera cannot see, and saying so
+        // is more useful than repeating the instruction.
+        const hands = tracking?.hands.length ?? 0;
+        const seen = hands > 0;
+
+        this.shell.tutorialWatch.dataset.seen = String(seen);
+        this.shell.tutorialWatchText.textContent = seen
+            ? `${hands === 1 ? 'One hand' : `${hands} hands`} in view`
+            : 'No hand in view';
 
         const step = this.tutorial.current;
 
@@ -1428,8 +1465,15 @@ export class Application {
             // Opened here rather than held open, so that between takes the
             // recogniser has the device. Permission is already granted by this
             // point, so this does not prompt.
-            if (this.microphoneEnabled) {
+            // Attempted whenever sound is wanted, not only when it is
+            // currently achievable. A refusal at session start leaves the
+            // achievable flag false, and a warning guarded by that flag is a
+            // warning that never fires in the case that needs it.
+            if (this.wantsSound) {
                 const state = await this.microphone.open();
+
+                this.microphoneEnabled = state === 'granted';
+                this.reflectMicrophoneState();
 
                 // Said before the take rather than discovered after it. A
                 // silent recording is not recoverable, and the user is the only

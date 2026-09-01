@@ -520,16 +520,21 @@
       so finishing it is also a test of this device: the camera, each gesture,
       the two recording poses, the microphone level and speech recognition.
     -->
-    <section class="overlay" data-role="overlay-tutorial" aria-labelledby="tutorial-title" hidden>
-        <div class="card card--reading" role="dialog" aria-modal="true">
+    <section class="overlay overlay--coach" data-role="overlay-tutorial"
+        aria-labelledby="tutorial-title" hidden>
+        <div class="card card--reading" role="dialog" aria-label="Try the controls">
             <h1 class="card__title" id="tutorial-title">Try the controls</h1>
             <p class="card__body">
-                Nine things to do with your hands and two with your voice. Each one
-                passes when this page actually sees it, so by the end you know what
-                works here and what does not.
+                Each step passes when this page actually sees it, and the camera
+                stays live throughout.
             </p>
 
             <div class="tutorial" data-role="tutorial-host"></div>
+
+            <p class="tutorial__watch" data-role="tutorial-watch" data-seen="false">
+                <span class="tutorial__dot"></span>
+                <span data-role="tutorial-watch-text">No hand in view</span>
+            </p>
 
             <div class="card__actions">
                 <button class="button" data-action="tutorial-skip">Skip this step</button>

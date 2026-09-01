@@ -207,6 +207,24 @@ export class OverlayController {
  * Anything else, including a value that is not an Error at all, is given a
  * generic remedy rather than being shown to the user raw.
  */
+/**
+ * Whether a window error is the browser's own notice about cascading observers.
+ *
+ * The layout engine emits this when resize observations trigger further layout
+ * within one frame. It is not thrown by any code, which is why its error object
+ * is null and it has no stack, and it describes work the engine has already
+ * deferred to the next frame rather than work that failed. There is nothing to
+ * report and nothing to do, so a handler that presents failures must let it
+ * pass; treating it as a crash turns a notice into a dead page.
+ *
+ * Two wordings exist across browser versions and both begin the same way.
+ */
+export function isObserverCascadeNotice(event: ErrorEvent): boolean {
+    return event.error === null
+        && typeof event.message === 'string'
+        && event.message.startsWith('ResizeObserver loop');
+}
+
 export function toPresentableError(error: unknown, title = 'Something went wrong'): PresentableError {
     if (error && typeof error === 'object' && 'remedy' in error && error instanceof Error) {
         return {

@@ -171,6 +171,8 @@ export interface Shell {
     tooltip: HTMLElement;
     tutorialOverlay: HTMLElement;
     tutorialHost: HTMLElement;
+    tutorialWatch: HTMLElement;
+    tutorialWatchText: HTMLElement;
 }
 
 /** Resolves the shell. Called once, before anything else runs. */
@@ -273,5 +275,7 @@ export function resolveShell(): Shell {
         tooltip: role('tooltip'),
         tutorialOverlay: role('overlay-tutorial'),
         tutorialHost: role('tutorial-host'),
+        tutorialWatch: role('tutorial-watch'),
+        tutorialWatchText: role('tutorial-watch-text'),
     };
 }

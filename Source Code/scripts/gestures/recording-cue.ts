@@ -52,7 +52,7 @@
  */
 
 import { RECORDING_GESTURES } from '../config';
-import { isOpenPalm, isRing } from '../tracking/features';
+import { isRing, isStopPalm } from '../tracking/features';
 import type { HandFrame, TrackingFrame } from '../tracking/landmarks';
 
 /** What the pose asks the recorder to do. */
@@ -187,7 +187,7 @@ export class RecordingCueDetector {
             // two thresholds rather than a rule, so the rule is stated here:
             // the pose that ends a take must never be satisfied by the pose
             // that starts one.
-            if (wanted === 'palm' && isOpenPalm(hand.features) && !isRing(hand.features)) {
+            if (wanted === 'palm' && isStopPalm(hand.features) && !isRing(hand.features)) {
                 return 'palm';
             }
         }
