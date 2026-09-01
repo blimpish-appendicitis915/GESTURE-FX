@@ -123,6 +123,19 @@
     <link rel="stylesheet" href="./styles/base.css">
 
     <style>
+        /*
+         * base.css fixes the application shell to the viewport and lets only its
+         * overlays scroll, which is correct for a camera interface and wrong for
+         * a document. This page is a document, so it takes its height from its
+         * content and scrolls in the ordinary way.
+         */
+        html,
+        body {
+            height: auto;
+            min-height: 100%;
+            overflow: visible;
+        }
+
         .sheet {
             max-width: 940px;
             margin: 0 auto;

@@ -765,7 +765,7 @@ export class Application {
 
         if (turningOn && !this.microphone.isAvailable) {
             this.shell.microphoneButton.disabled = true;
-            const state = await this.microphone.acquire();
+            const state = await this.microphone.prime();
             this.shell.microphoneButton.disabled = false;
 
             if (state !== 'granted') {
@@ -794,7 +794,7 @@ export class Application {
 
         const label = on
             ? 'Sound is being recorded'
-            : this.microphone.status === 'denied'
+            : this.microphone.permission === 'denied'
                 ? 'No microphone permission. Press to ask again'
                 : 'Record sound';
 
@@ -817,10 +817,12 @@ export class Application {
         this.shell.requestCameraButton.disabled = false;
         this.shell.switchCameraButton.hidden = !(await this.camera.hasMultipleCameras());
 
-        // Requested immediately after the camera, so the browser groups both
-        // into one permission sheet and the device is warm before the first
-        // take. A refusal is recorded and does not stop the session.
-        await this.microphone.acquire();
+        // Asked for immediately after the camera, so the browser groups both
+        // into one permission sheet. The device is closed again straight away:
+        // speech recognition wants the same microphone, and holding it for the
+        // whole session takes it from the recogniser. A refusal is recorded and
+        // does not stop the session.
+        await this.microphone.prime();
         this.reflectMicrophoneState();
 
         this.setState('loading');
@@ -898,6 +900,47 @@ export class Application {
      * changing what the window shows mid-take is a legitimate thing to do and
      * is one of the reasons to have voice control at all.
      */
+    /**
+     * Starts a take in response to a spoken command.
+     *
+     * The word is said from whichever state the user happens to be in, which
+     * after the first take is `review` and not `ready`. Acting only on `ready`
+     * meant every "record" after the first was discarded without a sound, which
+     * is indistinguishable from the recogniser not working at all. Anything
+     * showing over the preview is dismissed first, and a command that genuinely
+     * cannot be acted on says why.
+     */
+    private async startTakeByVoice(): Promise<void> {
+        if (!this.recordingSupport.supported) {
+            this.toast.show('Heard', 'this browser cannot record, so there is nothing to start');
+            return;
+        }
+
+        if (this.state === 'recording' || this.state === 'countdown') {
+            return;
+        }
+
+        // A finished take is put away, exactly as the button does it.
+        if (this.state === 'review') {
+            this.review.release();
+            this.clip = null;
+            this.setState('ready');
+        }
+
+        // A panel over the preview is closed, so the take is not made behind it.
+        if (this.state === 'settings' || this.state === 'method' || this.state === 'restyle') {
+            this.closePanel();
+        }
+
+        if (this.state !== 'ready') {
+            this.toast.show('Heard', 'the camera is not live yet, so a take cannot start');
+            return;
+        }
+
+        this.toast.show('Heard', 'starting the recording');
+        await this.onRecordPressed();
+    }
+
     private onVoiceCommand(command: VoiceCommand): void {
         if (command.kind === 'style') {
             SETTINGS.portalStyle = command.style;
@@ -908,11 +951,7 @@ export class Application {
         }
 
         if (command.kind === 'record') {
-            if (this.state === 'ready' && this.recordingSupport.supported) {
-                this.toast.show('Heard', 'starting the recording');
-                void this.onRecordPressed();
-            }
-
+            void this.startTakeByVoice();
             return;
         }
 
@@ -1140,6 +1179,13 @@ export class Application {
         this.applyRestyleAvailability();
 
         try {
+            // Opened here rather than held open, so that between takes the
+            // recogniser has the device. Permission is already granted by this
+            // point, so this does not prompt.
+            if (this.microphoneEnabled) {
+                await this.microphone.open();
+            }
+
             await this.recorder.start(this.shell.canvas, {
                 audioTracks: this.microphoneEnabled ? this.microphone.tracks() : [],
             });
@@ -1168,7 +1214,9 @@ export class Application {
 
         // Starting a recording with audio takes the microphone from the
         // recogniser. Some builds end its session at that point and some simply
-        // stop returning results, so it is restarted rather than trusted.
+        // stop returning results, so it is restarted rather than trusted, and
+        // told that the loss of the device is expected until the take ends.
+        this.voice.setDeviceBusy(this.microphoneEnabled);
         this.voice.reacquire();
     }
 
@@ -1269,8 +1317,10 @@ export class Application {
         this.frameGuide.hide();
         this.applyRestyleAvailability();
 
-        // The microphone has just been released, so the recogniser is given it
-        // back for the same reason it was restarted when the take began.
+        // The take is over, so the device is closed and the recogniser is
+        // restarted for the same reason it was restarted when the take began.
+        this.microphone.close();
+        this.voice.setDeviceBusy(false);
         this.voice.reacquire();
 
         this.review.present(this.clip);

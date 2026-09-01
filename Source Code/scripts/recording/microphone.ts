@@ -9,58 +9,90 @@
  * Tech Stack: TypeScript (ES2022), WebRTC getUserMedia
  *
  * Description:
- * Holds the microphone for the life of the session and lends its tracks to each
- * recording.
+ * Owns the microphone: asks for it once, then opens and closes it per take.
  *
- * The microphone is acquired when the camera is, for two reasons. The first is
- * that a browser shows one permission sheet for a request that names both
- * devices and two sheets for two requests, so asking together is a single
- * interruption rather than a pair of them. The second is timing: acquiring a
- * capture device takes a few hundred milliseconds, and a device acquired when
- * the record button is pressed is acquired during the opening of the take. The
- * first moment of the recording is then either missing or silent.
+ * Permission and possession are deliberately separate here, because the
+ * application wants one and not the other for most of a session.
+ *
+ * Permission is asked for when the camera is, for two reasons. A browser shows
+ * one sheet for a request naming both devices and two sheets for two requests,
+ * so asking together is a single interruption. And a device first acquired when
+ * the record button is pressed is acquired during the opening of the take, so
+ * the first moment of the recording is missing or silent.
+ *
+ * Possession is held only while recording. An open capture is not free: speech
+ * recognition wants the same device, and a microphone held for the whole session
+ * both keeps the browser's recording indicator lit and can starve the recogniser
+ * of audio. Between takes the device is closed and the granted permission is
+ * remembered, so re-opening it costs no prompt and is effectively immediate.
  *
  * A refusal is not an error. The session continues without sound, because a
  * declined microphone should cost the user their audio and not their video.
  */
 
-/** What became of the request, for the interface to report. */
-export type MicrophoneState = 'idle' | 'granted' | 'denied' | 'unsupported';
+/** What became of the request. Sticky: it survives the device being closed. */
+export type MicrophonePermission = 'unknown' | 'granted' | 'denied' | 'unsupported';
 
 export class Microphone {
     private stream: MediaStream | null = null;
-    private state: MicrophoneState = 'idle';
+    private granted: MicrophonePermission = 'unknown';
 
-    /** Whether a live audio track is currently held. */
-    get isAvailable(): boolean {
+    /** Whether the device is open right now. */
+    get isOpen(): boolean {
         return this.tracks().some((track) => track.readyState === 'live');
     }
 
-    /** The outcome of the last request. */
-    get status(): MicrophoneState {
-        return this.state;
+    /**
+     * Whether sound can be recorded, whether or not the device is open.
+     *
+     * This is what the interface reflects. Asking `isOpen` there would show the
+     * control as off between takes, which is exactly when the user looks at it.
+     */
+    get isAvailable(): boolean {
+        return this.granted === 'granted';
     }
 
-    /** The live audio tracks, or an empty list when there are none. */
+    /** The outcome of the last request. */
+    get permission(): MicrophonePermission {
+        return this.granted;
+    }
+
+    /** The live audio tracks, or an empty list when the device is closed. */
     tracks(): MediaStreamTrack[] {
         return this.stream?.getAudioTracks() ?? [];
     }
 
     /**
-     * Requests the microphone once.
+     * Asks for the microphone once, and closes it again.
      *
-     * Calling it again while a live track is held is a no-op, so it is safe to
-     * call on every session start and after a camera switch.
+     * Called alongside the camera. The point is the permission and the
+     * confirmation that a device exists, not the stream, so the stream is
+     * released immediately and re-opened when a take starts.
      */
-    async acquire(): Promise<MicrophoneState> {
-        if (this.isAvailable) {
-            return this.state;
+    async prime(): Promise<MicrophonePermission> {
+        const outcome = await this.open();
+
+        this.close();
+
+        return outcome;
+    }
+
+    /**
+     * Opens the device, or confirms it is already open.
+     *
+     * Safe to call before every take. Once permission has been granted the
+     * browser does not prompt again, so this is a fast path rather than an
+     * interruption.
+     */
+    async open(): Promise<MicrophonePermission> {
+        if (this.isOpen) {
+            return this.granted;
         }
 
         if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-            this.state = 'unsupported';
+            this.granted = 'unsupported';
 
-            return this.state;
+            return this.granted;
         }
 
         try {
@@ -72,27 +104,36 @@ export class Microphone {
                 },
             });
 
-            this.state = 'granted';
+            this.granted = 'granted';
         } catch (error) {
             // Recording without sound is a lesser failure than not recording,
-            // so this is reported to the console and to the interface, and
-            // nowhere is it thrown.
+            // so this is reported and never thrown.
             console.warn('[gesture-fx] microphone unavailable, takes will be silent', error);
 
             this.stream = null;
-            this.state = 'denied';
+            this.granted = 'denied';
         }
 
-        return this.state;
+        return this.granted;
     }
 
-    /** Releases the device, which clears the browser's recording indicator. */
-    release(): void {
+    /**
+     * Closes the device, keeping the permission.
+     *
+     * This is what hands the microphone back to speech recognition and clears
+     * the browser's recording indicator between takes.
+     */
+    close(): void {
         for (const track of this.tracks()) {
             track.stop();
         }
 
         this.stream = null;
-        this.state = 'idle';
+    }
+
+    /** Closes the device and forgets the permission, for teardown. */
+    release(): void {
+        this.close();
+        this.granted = 'unknown';
     }
 }

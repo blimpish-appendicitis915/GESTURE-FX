@@ -106,7 +106,7 @@ const PHRASES: ReadonlyArray<{ command: VoiceCommand; spoken: readonly string[] 
  * of the three toward the failure limit switches voice control off during
  * ordinary use.
  */
-const TRANSIENT = ['no-speech', 'aborted', 'audio-capture', 'network'];
+const TRANSIENT = ['no-speech', 'aborted', 'network'];
 
 // The interface is not in the DOM type library, because it has never left
 // draft. Only the members this module uses are declared.
@@ -182,6 +182,17 @@ export class VoiceCommands {
     /** Consecutive failures, used to give up rather than restart forever. */
     private failures = 0;
 
+    /**
+     * Consecutive capture failures outside a recording.
+     *
+     * Counted separately from `failures` because a lost device is worth
+     * retrying indefinitely and worth reporting once.
+     */
+    private captureFailures = 0;
+
+    /** Set while a recording legitimately holds the microphone. */
+    private deviceBusy = false;
+
     private watchdog = 0;
 
     constructor(
@@ -252,6 +263,22 @@ export class VoiceCommands {
         }
 
         this.onState(false);
+    }
+
+    /**
+     * Declares whether something else is legitimately using the microphone.
+     *
+     * A recording takes the device, and the capture errors that follow are
+     * expected for as long as it runs. Outside that window the same error means
+     * the device has been lost, which the user needs to be told about rather
+     * than left to infer from commands that never fire.
+     */
+    setDeviceBusy(busy: boolean): void {
+        this.deviceBusy = busy;
+
+        if (!busy) {
+            this.captureFailures = 0;
+        }
     }
 
     /**
@@ -328,9 +355,29 @@ export class VoiceCommands {
     }
 
     private handleError(error: string): void {
+        if (error === 'audio-capture') {
+            // Expected for as long as a recording holds the device.
+            if (this.deviceBusy) {
+                return;
+            }
+
+            this.captureFailures += 1;
+
+            if (this.captureFailures === VOICE.captureFailureNotice) {
+                this.onError(
+                    'The microphone is not reaching speech recognition, so no command '
+                    + 'can be heard. Close anything else using it, or switch voice '
+                    + 'control off and on again.',
+                );
+            }
+
+            // Retried regardless: the device may come back on its own.
+            return;
+        }
+
         if (TRANSIENT.includes(error)) {
-            // Not a failure. Silence, a lost microphone and a network blip are
-            // all ordinary, and the restart path already handles them.
+            // Not a failure. Silence and a network blip are both ordinary, and
+            // the restart path already handles them.
             return;
         }
 
@@ -375,6 +422,7 @@ export class VoiceCommands {
             if (command) {
                 this.lastCommandAt = now;
                 this.failures = 0;
+                this.captureFailures = 0;
                 this.onCommand(command);
                 return;
             }

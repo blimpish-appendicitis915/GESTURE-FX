@@ -108,16 +108,20 @@ over the pixels and holds a phone at 24 Hz, which no network of that quality
 does. The window needs the second, because the effect has to be in the frame
 being recorded and not in a file produced afterwards.
 
-> [!NOTE]
-> **Prior work, and who wrote it.** *White-Box Cartoonization Using an Extended
-> GAN Framework*, by Amey Thakur, [Mega Satish](https://github.com/msatmod) and
+> [!IMPORTANT]
+> **With thanks to Mega Satish and Hasan Rizvi.** The decomposition this window
+> uses comes from work I did with them, and the credit for that work is theirs
+> as much as mine.
+>
+> *White-Box Cartoonization Using an Extended GAN Framework*, by
+> [Amey Thakur](https://github.com/Amey-Thakur),
+> [Mega Satish](https://github.com/msatmod) and
 > [Hasan Rizvi](https://github.com/rizvihasan). IJEAST 5(12), 2021.
 > [DOI](https://doi.org/10.33564/IJEAST.2021.v05i12.049) ·
 > [Repository](https://github.com/Amey-Thakur/WHITE-BOX-CARTOONIZATION) ·
 > [Preprint](https://arxiv.org/abs/2107.04551)
 >
-> That work is theirs as much as mine, and the credit for it belongs to that
-> paper rather than to this one. GESTURE-FX is my own. What is new here is the
+> They did not work on GESTURE-FX, which is my own. What is new here is the
 > closed-form construction of each representation and the derivation of the
 > three constants that govern them, which [the paper](paper/) sets out in full.
 

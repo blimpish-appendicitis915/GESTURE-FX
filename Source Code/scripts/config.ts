@@ -394,6 +394,17 @@ export const VOICE = {
     maximumFailures: 4,
 
     /**
+     * Consecutive capture failures, outside a recording, after which the user
+     * is told rather than the restart being retried in silence.
+     *
+     * A microphone that another part of the page is holding produces this
+     * error indefinitely. Retrying is still correct, because the device may
+     * come back; saying nothing while retrying is not, because the interface
+     * goes on claiming to listen.
+     */
+    captureFailureNotice: 4,
+
+    /**
      * How often a stopped session is noticed and restarted.
      *
      * The lifecycle events are not reliable across engines: a session can end
