@@ -302,6 +302,7 @@ class PalmFlipDetector implements DetectorInstance {
             gestureId: 'palm-flip',
             effectId: 'glitch',
             at: this.zeroCrossing(),
+            sampledAt: this.beforeAt || this.crossedAt,
             handedness,
             confidence: clamp(0.55 * reach + 0.45 * speed, 0, 1),
         };

@@ -333,6 +333,14 @@ interface Outcome {
     fired: boolean;
     /** Reported instant less true instant, in milliseconds. */
     error: number | null;
+    /**
+     * The same error had the detector reported the sample it bracketed from
+     * rather than interpolating between it and the next.
+     *
+     * This is the figure the interpolation is measured against, and it is the
+     * best a detector confined to its own sampling instants can do.
+     */
+    sampledError: number | null;
 }
 
 /**
@@ -370,16 +378,19 @@ function run(sequence: Sequence): Outcome {
                 continue;
             }
 
+            const truth = sequence.crossingAt === null ? null : origin + sequence.crossingAt;
+
             return {
                 fired: true,
-                error: sequence.crossingAt === null
+                error: truth === null ? null : trigger.at - truth,
+                sampledError: truth === null || trigger.sampledAt === undefined
                     ? null
-                    : trigger.at - (origin + sequence.crossingAt),
+                    : trigger.sampledAt - truth,
             };
         }
     }
 
-    return { fired: false, error: null };
+    return { fired: false, error: null, sampledError: null };
 }
 
 function quantile(values: number[], fraction: number): number {
@@ -400,6 +411,7 @@ interface ClassResult {
     fired: number;
     total: number;
     errors: number[];
+    sampledErrors: number[];
 }
 
 function evaluate(): ClassResult[] {
@@ -414,6 +426,7 @@ function evaluate(): ClassResult[] {
 
     return classes.map((entry) => {
         const errors: number[] = [];
+        const sampledErrors: number[] = [];
         let fired = 0;
 
         for (let trial = 0; trial < TRIALS; trial += 1) {
@@ -426,9 +439,21 @@ function evaluate(): ClassResult[] {
             if (outcome.error !== null) {
                 errors.push(outcome.error);
             }
+
+            if (outcome.sampledError !== null) {
+                sampledErrors.push(outcome.sampledError);
+            }
         }
 
-        return { name: entry.name, note: entry.note, shouldFire: entry.shouldFire, fired, total: TRIALS, errors };
+        return {
+            name: entry.name,
+            note: entry.note,
+            shouldFire: entry.shouldFire,
+            fired,
+            total: TRIALS,
+            errors,
+            sampledErrors,
+        };
     });
 }
 
@@ -449,11 +474,23 @@ function render(results: ClassResult[]): void {
         fired: results[0].fired + results[1].fired,
         total: results[0].total + results[1].total,
         errors: [...results[0].errors, ...results[1].errors],
+        sampledErrors: [...results[0].sampledErrors, ...results[1].sampledErrors],
     };
 
     const absolute = flips.errors.map(Math.abs);
     const mean = absolute.reduce((total, value) => total + value, 0) / (absolute.length || 1);
     const signedMean = flips.errors.reduce((total, value) => total + value, 0) / (flips.errors.length || 1);
+
+    // The same statistics for the sample the detector bracketed from, which is
+    // where the report would sit without the interpolation.
+    const sampled = flips.sampledErrors.map(Math.abs);
+    const sampledMean = sampled.reduce((total, value) => total + value, 0) / (sampled.length || 1);
+    const sampledSignedMean =
+        flips.sampledErrors.reduce((total, value) => total + value, 0) / (flips.sampledErrors.length || 1);
+
+    const both = (interpolated: number, raw: number, unit = ' ms', places = 1) =>
+        `<td class="figure">${raw.toFixed(places)}${unit}</td>`
+        + `<td class="figure">${interpolated.toFixed(places)}${unit}</td>`;
 
     const falsePositives = results
         .filter((entry) => !entry.shouldFire)
@@ -492,18 +529,19 @@ function render(results: ClassResult[]): void {
         <h2>Timing error on the flip class</h2>
         <p>
             Reported instant less true instant. A negative figure means the detector
-            placed the gesture earlier than it happened.
+            placed the gesture earlier than it happened. The left column is the
+            sample the detector bracketed from, which is the best it can do while
+            confined to its own observation instants; the right is the instant
+            interpolated between that sample and the next.
         </p>
         <table>
-            <tr><th>Mean absolute error</th><td class="figure">${mean.toFixed(1)} ms</td>
-                <td class="figure">${(mean / INTERVAL_MS).toFixed(2)} tracking frames</td></tr>
-            <tr><th>Median absolute error</th><td class="figure">${quantile(absolute, 0.5).toFixed(1)} ms</td>
-                <td class="figure">${(quantile(absolute, 0.5) / INTERVAL_MS).toFixed(2)} frames</td></tr>
-            <tr><th>90th percentile</th><td class="figure">${quantile(absolute, 0.9).toFixed(1)} ms</td>
-                <td class="figure">${(quantile(absolute, 0.9) / INTERVAL_MS).toFixed(2)} frames</td></tr>
-            <tr><th>Mean signed error</th><td class="figure">${signedMean.toFixed(1)} ms</td><td></td></tr>
-            <tr><th>Worst case</th><td class="figure">${Math.max(...absolute).toFixed(1)} ms</td>
-                <td class="figure">${(Math.max(...absolute) / INTERVAL_MS).toFixed(2)} frames</td></tr>
+            <tr><th></th><th class="figure">At the sample</th><th class="figure">Interpolated</th></tr>
+            <tr><th>Mean absolute error</th>${both(mean, sampledMean)}</tr>
+            <tr><th></th>${both(mean / INTERVAL_MS, sampledMean / INTERVAL_MS, ' frames', 2)}</tr>
+            <tr><th>Median absolute error</th>${both(quantile(absolute, 0.5), quantile(sampled, 0.5))}</tr>
+            <tr><th>90th percentile</th>${both(quantile(absolute, 0.9), quantile(sampled, 0.9))}</tr>
+            <tr><th>Mean signed error</th>${both(signedMean, sampledSignedMean)}</tr>
+            <tr><th>Worst case</th>${both(Math.max(...absolute), Math.max(...sampled))}</tr>
         </table>
 
         <div class="verdict">

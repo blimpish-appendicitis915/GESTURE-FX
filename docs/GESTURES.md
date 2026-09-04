@@ -187,15 +187,19 @@ handedness label except to report it.
              │                                       |s| ≤ 0.15  │  record crossedAt
              │                                                  ▼
         ┌────────────┐   opposite sign, |s| ≥ 0.30,      ┌────────────┐
-        │  TRIGGER   │ ◄─── 60 ms ≤ elapsed ≤ 600 ms ─── │  crossing  │
+        │  TRIGGER   │ ◄─── 20 ms ≤ elapsed ≤ 600 ms ─── │  crossing  │
         └────────────┘                                   └────────────┘
              │                                                  │
              └──────────► re-arm on the new face ◄──────────────┘
                           (same sign returns here without firing)
 ```
 
-The trigger carries `at = crossedAt`, the instant the palm went edge-on, not
-the instant confirmation arrived.
+The trigger carries `at`, the instant the palm went edge-on, not the instant
+confirmation arrived. That instant is the zero of `s` interpolated between the
+last sample carrying the old sign and the first carrying the new one, so it
+usually falls between two observations rather than on one. The trigger also
+carries `sampledAt`, the observation it was interpolated from, so the size of
+the claim is visible to anything downstream.
 
 ### 2.8 What each condition rejects
 
@@ -203,7 +207,7 @@ the instant confirmation arrived.
 |-----------|-------------------------------|
 | Steady palm held 120 ms before arming | A hand entering the frame already mid-rotation, firing on the tail of a movement never observed |
 | At least three fingers extended | A rotating fist, and a wrist turn while gesturing in conversation |
-| Crossing completes in at least 60 ms | A single frame of bad landmarks inverting the winding |
+| Crossing completes in at least 20 ms | A single frame of bad landmarks inverting the winding. The bound is well below the length of a turn because it times the passage through edge-on, which for a 300 ms turn is some 40 ms |
 | Crossing completes within 600 ms | A hand held edge-on, as when pointing. A slow turn is the same gesture and does fire |
 | Opposite face reached and settles | A hand that wobbles toward edge-on and returns |
 | 1.2 second refractory | One physical flip producing two triggers |

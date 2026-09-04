@@ -162,7 +162,7 @@ exactly, from projective geometry.
         the two samples that bracket it, with a proof that the error is second
         order in the sampling interval where reporting either sample is first
         order (Proposition~\ref{prop:interpolation}), and a measurement showing
-        the mean absolute error falling from $33.4$\,ms to $6.7$\,ms.
+        the mean absolute error falling from $23.0$\,ms to $6.7$\,ms.
   \item A generated corpus with exact ground truth, and the argument for
         generating rather than filming it, which is that the crossing frame is
         not observable in video to a precision finer than the quantity being
@@ -248,7 +248,27 @@ thresholds around it gate evidence quality rather than define the gesture. That
 distinction is what allows a claim of exactness in
 Theorem~\ref{thm:crossing} that a tuned rule could not support.
 
-\subsection{Temporal localisation from motion}
+\subsection{Locating a gesture in time}
+
+Two literatures address directly the question of where a gesture sits in a
+stream. Gesture spotting separates gestures from the movements between them in a
+continuous signal; the threshold model of \citet{lee1999threshold} is the
+canonical treatment, adding a garbage state against which candidate gestures
+compete so that a segmentation falls out of the recognition rather than being
+imposed before it. Temporal action localisation asks the same question of
+untrimmed video and answers it with proposals scored and refined by a network, in
+the multi-stage form of \citet{shou2016temporal}.
+
+Both return a segment. That is the right output for their purposes, and it is one
+step short of what synchronisation needs: a segment has two boundaries and the
+instant we require is interior to it, so recovering the instant means positing a
+further rule over the segment. The boundaries are also where these methods are
+least certain, since they are defined by the decay of a score rather than by any
+event. The criterion here differs in kind rather than in accuracy. It does not
+locate a segment and then reduce it; the quantity it evaluates has a zero, the
+zero is the event, and there is nothing left to reduce.
+
+\subsection{Optical flow as a temporal cue}
 
 When the question is when something moved rather than what shape it took, dense
 optical flow is the usual instrument, most often in the polynomial-expansion
@@ -535,8 +555,15 @@ development:
   \item at least three fingers extended, rejecting a rotating fist and a
         conversational wrist turn;
   \item the transit from $|s| \leq \tau_{\mathrm{cross}}$ to the opposite face
-        completing within $[60, 600]$\,ms, rejecting single-frame landmark
-        inversions below and slow reorientations above;
+        completing within $[20, 600]$\,ms. The lower bound excludes a crossing
+        that begins and ends inside one sample, which is what a single inverted
+        landmark frame produces, and is far below the duration of a turn because
+        it times the passage through edge-on rather than the turn: a hand that
+        takes $300$\,ms to turn over is edge-on for some $40$\,ms of it, and a
+        guard set at the duration of a turn rejects most real flips. The upper
+        bound excludes a hand brought to edge-on and held there, not a hand
+        turned over slowly, which passes through edge-on quickly whatever its
+        overall pace and is the same gesture at a different speed;
   \item the opposite face reaching $|s| \geq \tau_{\mathrm{confirm}}$, rejecting
         a wobble toward edge-on that returns.
 \end{enumerate}
@@ -586,8 +613,8 @@ distance to the zero, which is $O(\Delta t)$.
 \end{proof}
 
 Section~\ref{sec:evaluation} measures this: the interpolant reduces the mean
-absolute localisation error from $33.4$\,ms to $6.7$\,ms and removes a
-$30.5$\,ms bias, at the cost of one division and two stored samples.
+absolute localisation error from $23.0$\,ms to $6.7$\,ms and removes a
+$22.1$\,ms bias, at the cost of one division and two stored samples.
 
 \subsection{Rate-decoupled compositing}
 \label{sec:decoupled}
@@ -686,8 +713,9 @@ Let $Q$ be the closed polyline $c_0c_1c_2c_3c_0$ in general position.
   \item If the edges $c_0c_1$ and $c_2c_3$ meet at a point $x$ interior to both,
         then
         \[
-          E(Q) \;=\; T(c_0,x,c_3)\,\cup\,T(c_1,c_2,x) \;\subsetneq\; F(Q).
+          E(Q) \;=\; T(c_0,x,c_3)\,\cup\,T(c_1,c_2,x) \;\subseteq\; F(Q),
         \]
+        and the inclusion is strict.
 \end{enumerate}
 \end{proposition}
 
@@ -700,7 +728,11 @@ only at $x$ and each traversed once. A ray from a point interior to either loop
 meets the boundary an odd number of times and a ray from a point exterior to both
 meets it an even number, which is the stated union. Containment in $F(Q)$ is
 immediate because each lobe has its three vertices in one triangle of the fan,
-and both triangles are convex; strictness follows from the corollary below.
+and both triangles are convex. Strictness holds because $x$ is interior to
+$c_0c_1$, so the triangle $T(c_0,c_1,c_2)$ of the fan contains a neighbourhood of
+points on the far side of $c_0x$ from $c_3$; such points lie in no lobe, since
+each lobe is bounded by $c_0x$ and $xc_1$ respectively. The corollary below
+measures the excess in one symmetric case.
 \end{proof}
 
 \begin{corollary}
@@ -715,8 +747,9 @@ what it draws lies outside it.
 \end{corollary}
 
 The predicate costs four half-open vertical comparisons and at most four
-divisions, against nine multiplications for the two triangles, so correctness is
-obtained at a lower price than the failure it replaces.
+divisions. The fan it replaces costs a signed area for each of the five distinct
+edges of its two triangles, ten multiplications, so correctness here is obtained
+at a lower price than the failure it replaces.
 
 \subsection{Stylising the interior}
 \label{sec:stylise}
@@ -803,10 +836,15 @@ Line work is a difference of Gaussians \citep{marr1980edge},
   \label{eq:dog}
   D_\sigma = G_\sigma * L - G_{k\sigma} * L, \qquad k = 1.6,
 \end{equation}
-thresholded through a hyperbolic tangent in the manner of the extended operator
-of \citet{winnemoller2012xdog}. The two kernels are given equal weight, which is
-the property the threshold depends on: both integrate to unity, so $D_\sigma$
-vanishes identically on any region of constant $L$, whatever that constant is.
+thresholded in the manner of the extended operator of
+\citet{winnemoller2012xdog}, though through a ramp rather than through that
+operator's hyperbolic tangent. A tangent approaches its limits without reaching
+them, so it returns a small nonzero coverage at zero difference and lays a faint
+wash of ink over every flat region in the frame; in a style that adds its line to
+a dark ground rather than mixing it in, the wash becomes the picture. A ramp is
+exactly zero above its bias. The two kernels are given equal weight, which is
+what makes that possible: both integrate to unity, so $D_\sigma$ vanishes
+identically on any region of constant $L$, whatever that constant is.
 The weighted form $G_\sigma - \tau G_{k\sigma}$ with $\tau<1$ instead leaves a
 residue $(1-\tau)L$ proportional to brightness, and no single threshold then
 draws the same line on a lit face and on a dark coat.
@@ -839,20 +877,25 @@ The consequence settles a design choice. A camera frame with per-channel noise
 $\sigma_n = 0.03$ carries luminance noise
 $\sigma_L = \sigma_n\sqrt{0.2126^2+0.7152^2+0.0722^2} = 0.750\,\sigma_n = 0.0225$,
 so at $\sigma = 1.4$ pixels Proposition~\ref{prop:dognoise} gives a response of
-standard deviation $2.3\times10^{-3}$ against a threshold
-$\varepsilon = -3.5\times10^{-3}$. The operator therefore fires on grain at
-roughly two thirds of the contrast it requires of a contour, which is precisely
-the field of short marks we observed across flat walls. We read it instead from
+standard deviation $2.3\times10^{-3}$. The operator does not threshold at a point
+but over a ramp: ink begins at $D_\sigma = -1.6\times10^{-3}$ and is laid in full
+at $-4.8\times10^{-3}$, so the contrast at which a line is half drawn is
+$\varepsilon = -3.2\times10^{-3}$. Grain therefore reaches two thirds of the
+contrast the operator asks of a contour, and exceeds outright the contrast at
+which it begins to draw, which is precisely the field of short marks we observed
+across flat walls. We read it instead from
 a mixture
 \begin{equation}
   \label{eq:mixture}
   L = (1-\lambda)\,L_{\text{surface}} + \lambda\,L_{\text{raw}}, \qquad \lambda = 0.16,
 \end{equation}
-where $L_{\text{surface}}$ is the output of \eqref{eq:bilateral}. The raw share
-restores detail the reduced-resolution surface cannot carry, and scales the noise
-response to $3.7\times10^{-4}$, which places the threshold at $9.4$ standard
-deviations. The choice of $\lambda$ is thus fixed by the ratio the operator must
-achieve, not by inspection.
+where $L_{\text{surface}}$ is the output of \eqref{eq:bilateral}. The surface
+has already had the grain averaged out of it, so what reaches the operator is the
+raw share of the noise and its response scales with $\lambda$. Requiring the
+half-drawn contrast to stand at least eight standard deviations clear of that
+response bounds $\lambda \leq 0.17$; we use $0.16$, which places it at $8.6$ and
+leaves the fine detail the half-resolution surface cannot carry. The value is
+fixed by the ratio the operator must achieve, not by inspection.
 
 \subsection{Following the subject}
 \label{sec:framing}
@@ -882,8 +925,10 @@ the dead zone contracts geometrically,
 
 \begin{proof}
 The coefficient $\max(0,\|e\|-\delta)/\|e\|$ tends to $0$ as $\|e\|\to\delta$
-from either side, so the displacement is continuous across the boundary and the
-map has no fixed point outside the ball. For $\|e_t\| > \delta$ the displacement
+from either side, so the displacement is continuous across the boundary. Inside
+the ball the coefficient is identically zero and every point is fixed; outside it
+the displacement has magnitude $\alpha(\|e\|-\delta) > 0$, so no point there is
+fixed. For $\|e_t\| > \delta$ the displacement
 is parallel to $e_t$ with magnitude $\alpha(\|e_t\|-\delta)$, so
 $\|e_{t+1}\| = \|e_t\| - \alpha(\|e_t\|-\delta)$; subtracting $\delta$ gives the
 stated recurrence.
@@ -1024,9 +1069,12 @@ each stage is an opportunity for drift.
   \includegraphics[width=0.92\textwidth]{rewind.jpg}
   \caption{Verification of the temporal buffer. The synthetic subject renders the
   elapsed time at which each frame was drawn, and moves, so a recalled frame is
-  distinguishable from a recoloured current one. The live frame reads
-  $4.3$\,s; during the composite the recalled frames read $2.5$, $2.8$ and
-  $2.9$\,s; afterwards, $5.6$\,s. The requested delay was $2.2$\,s.}
+  distinguishable from a recoloured current one. The strip runs left to right:
+  one live frame at $4.3$\,s, three recalled frames reading $2.5$, $2.8$ and
+  $2.9$\,s, and one live frame after the effect at $5.6$\,s. The live clock at
+  each recalled frame is not printed on it, but lies between those two bounds and
+  advances with the strip, so each recalled frame is about the requested
+  $2.2$\,s behind the moment it was shown.}
   \label{fig:rewind}
 \end{figure}
 
@@ -1057,28 +1105,35 @@ symmetric configuration it draws half as much area again as the window, a third 
 it outside.
 
 \paragraph{Abstraction.}
-Against a flat field carrying per-channel noise of standard deviation $0.06$, the
-mean absolute difference between horizontally adjacent output samples inside the
-window fell from $4.6$ to $2.7$ of $255$ with the schedule of
-Section~\ref{sec:stylise} in place. The residue is the amplification of
-\eqref{eq:slope} acting on what the surface still carries, and is what
-\eqref{eq:mixture} and the five-tap band selection are sized against.
+A flat field was given independent per-channel grain drawn uniformly on
+$\pm 15$ of $255$, a standard deviation of $8.7$, and delivered to the renderer
+through the same capture path a camera uses. The mean absolute difference between
+horizontally adjacent output samples, measured well inside the window and clear
+of its border, was $4.5$ of $255$ without the window and $0.2$ with it. The grain
+is drawn from a seeded stream, so the two figures are reproducible rather than
+merely reported. What the schedule of Section~\ref{sec:stylise} leaves is
+therefore below the amplification of \eqref{eq:slope}, which is what
+\eqref{eq:mixture} and the five-tap band selection were sized to achieve.
 
 \paragraph{Separation of the styles.}
-The five media are intended to be nameable from a still. We rendered one frame
+The seven media are intended to be nameable from a still. We rendered one frame
 through each and measured the mean absolute channel difference over the interior
-of the window for all ten pairs. The closest pair differed by $14$ of $255$,
-against a floor of $12$ set before the measurement; the widest, ink against
-comic, by $106$. The measurement is reported because "they look different" is
-otherwise an assertion by the author about their own work.
+of the window for all twenty-one pairs. The widest, neon against ink, differed by
+$122.7$ of $255$; the closest, cartoon against paint, by $7.6$, against a floor of
+$6$ set before the measurement. Those two share a flattened surface and differ
+mainly in saturation and in the direction of their strokes, so they are the pair
+a reader should expect to find closest, and $7.6$ is a thinner margin than the
+rest of the set enjoys. The measurement is reported, and its weakest pair named,
+because ``they look different'' is otherwise an assertion by the author about
+their own work.
 
 \paragraph{Behavioural coverage.}
-Two suites run against the shipped modules. Eighty-five assertions cover the
+Four suites run against the shipped modules. Ninety assertions cover the
 render passes, the coverage predicate under crossing, the framing clamp, the
 noise reduction, the tracker's hysteresis and dropout behaviour, the spoken
 command matcher, the credential store, the prompt constraint, the geometry track
 and the exchange of Section~\ref{sec:delegated} against a stubbed transport.
-Forty-one further assertions drive the application through its own document with
+Forty-two further assertions drive the application through its own document with
 a synthetic camera and microphone, from the first-visit guide to a downloaded
 file, and confirm among other things that audio is present in the encoded output
 by decoding it rather than by trusting the container's declaration.
@@ -1093,13 +1148,22 @@ correctly, and every recording was mute. Only decoding the output distinguishes
 that state from a working one. The correction is to choose the container per
 take, once the track set is known, rather than once at startup.
 
+A third suite of twenty-two puts synthetic landmark poses through the
+recording-cue detector at the rate the render loop actually calls it, which is
+where a detector that treats a throttled frame as an absent hand is caught. A
+fourth of ten stubs the speech interface and pushes transcripts through the
+shipped matcher. The four suites total one hundred and sixty-four assertions.
+
 \paragraph{Temporal buffer.}
 The buffer was verified by rendering a subject that states its own draw time and
 moves between draws (Figure~\ref{fig:rewind}). With a requested delay of
-$2.2$\,s, the live frame read $4.3$\,s and the recalled frames read $2.5$, $2.8$
-and $2.9$\,s, with the subject visibly displaced. The buffer therefore returns
-genuine earlier frames at approximately the requested delay, the residual being
-the $125$\,ms capture granularity at $f_b = 8$\,Hz.
+$2.2$\,s, the strip runs from a live frame at $4.3$\,s, through three recalled
+frames reading $2.5$, $2.8$ and $2.9$\,s, to a live frame at $5.6$\,s, with the
+subject visibly displaced between them. Each recalled frame therefore sits about
+$2.2$\,s behind the live clock at the moment it was shown, which advances across
+the strip. The buffer returns genuine earlier frames at approximately the
+requested delay, the residual being the $125$\,ms capture granularity at
+$f_b = 8$\,Hz.
 
 \paragraph{Two-hand frame.}
 The tracker was exercised with synthetic landmark configurations. It correctly
@@ -1109,10 +1173,12 @@ places, held the window through a $133$\,ms tracking dropout, closed after the
 hands left, and rejected a configuration whose area fell below the opening gate.
 
 \paragraph{End-to-end.}
-Thirty-three scripted assertions covering acquisition, recording, review, export,
-output presets, filters, effect rebinding, settings persistence, theme selection,
-focus containment and keyboard dismissal passed against both the development and
-the deployed build.
+The second suite covers acquisition, recording, review, export, output presets,
+filters, effect rebinding, settings persistence, theme selection, focus
+containment and keyboard dismissal, and passes against both the development
+server and the deployed build. The distinction matters: the bundler moves
+stylesheet links in the built page, and an override that wins by source order in
+development can lose in the build.
 
 \paragraph{Detector accuracy against known ground truth.}
 The quantity that matters for a frame-synchronous detector is the error between
@@ -1152,16 +1218,17 @@ the near misses are what make the positive result meaningful.
     Rotating closed hand                    & must not fire & $0/60$  & $100.0\%$ \\
     Entering frame mid-rotation             & must not fire & $0/60$  & $100.0\%$ \\
     \midrule
-    \textbf{Total}                          &               & \multicolumn{2}{r}{$95.0\%$ detected, $0$ false positives in $240$} \\
+    \textbf{Total}                          &               & \multicolumn{2}{r}{$95.0\%$ detected, $0$ false positives in $240$ near misses} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[t]
   \centering
-  \caption{Localisation error on the $114$ detected flips, before and after the
-  interpolation of Section~\ref{sec:interpolation}. The sampling interval is
-  $41.7$\,ms.}
+  \caption{Localisation error on the $114$ detected flips, reported at the
+  bracketing sample and after the interpolation of
+  Section~\ref{sec:interpolation}. The sampling interval is $41.7$\,ms. Both
+  columns are computed by the published evaluation.}
   \label{tab:localisation}
   \begin{tabular}{lrrrr}
     \toprule
@@ -1169,11 +1236,11 @@ the near misses are what make the positive result meaningful.
     \cmidrule(lr){2-3}\cmidrule(lr){4-5}
     & ms & frames & ms & frames \\
     \midrule
-    Mean absolute error   & $33.4$  & $0.80$ & $6.7$  & $0.16$ \\
-    Median absolute error & $23.7$  & $0.57$ & $4.0$  & $0.10$ \\
-    Ninetieth percentile  & $76.3$  & $1.83$ & $18.1$ & $0.43$ \\
-    Worst case            & $108.0$ & $2.59$ & $26.7$ & $0.64$ \\
-    Mean signed error     & $-30.5$ & ---    & $+0.8$ & ---    \\
+    Mean absolute error   & $23.0$ & $0.55$ & $6.7$  & $0.16$ \\
+    Median absolute error & $22.2$ & $0.53$ & $4.0$  & $0.10$ \\
+    Ninetieth percentile  & $41.7$ & $1.00$ & $18.1$ & $0.43$ \\
+    Worst case            & $66.3$ & $1.59$ & $26.7$ & $0.64$ \\
+    Mean signed error     & $-22.1$ & ---   & $+0.8$ & ---    \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -1181,11 +1248,12 @@ the near misses are what make the positive result meaningful.
 Three things in Tables~\ref{tab:classification} and~\ref{tab:localisation} are
 worth stating plainly.
 
-The detector localises the gesture to a tenth of the interval at which it
-observes, which is the practical content of Proposition~\ref{prop:interpolation}:
-a zero crossing carries information between samples that a per-frame label does
-not. A classifier operating on the same stream cannot report an instant finer
-than the frame it labels.
+The detector localises the gesture to a sixth of the interval at which it
+observes, and to a tenth of it in the median case, against the $0.55$ frames that
+reporting the bracketing sample costs. That is the practical content of
+Proposition~\ref{prop:interpolation}: a zero crossing carries information between
+samples that a per-frame label does not. A classifier operating on the same
+stream cannot report an instant finer than the frame it labels.
 
 The mean signed error after interpolation is under one millisecond, so what
 remains is scatter rather than bias, and its source is the landmark noise

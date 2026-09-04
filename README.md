@@ -269,7 +269,7 @@ Against 360 generated sequences in which the crossing time is known exactly:
 | **Mean localisation error** | 6.7 ms, a sixth of the interval between two tracking frames |
 | **Median** | 4.0 ms, a tenth of that interval |
 
-The zero lies between samples, so it is interpolated between the two that bracket it. That alone took the mean error from 33.4 ms to 6.7 ms and removed a 30 ms bias. **A detector that treats a gesture as the zero of a continuous quantity can report it more finely than it samples**, which a per-frame label cannot.
+The zero lies between samples, so it is interpolated between the two that bracket it. That alone took the mean error from 23.0 ms to 6.7 ms and removed a 22 ms bias. **A detector that treats a gesture as the zero of a continuous quantity can report it more finely than it samples**, which a per-frame label cannot.
 
 The corpus is generated rather than filmed, because the crossing frame is not observable in video to a precision finer than the error being measured. The figures therefore bound the detector's own error and exclude the landmark estimator's.
 

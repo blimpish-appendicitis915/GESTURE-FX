@@ -44,6 +44,18 @@ export interface GestureTrigger {
      */
     at: number;
 
+    /**
+     * The observation `at` was inferred from, where the detector interpolated.
+     *
+     * A detector that locates an event between two samples is claiming to know
+     * something finer than it observed, and the size of that claim is the
+     * distance between this and `at`. Reporting both makes the claim auditable
+     * instead of asking that it be taken on trust, and it is what the published
+     * evaluation measures the interpolation against. Detectors that report the
+     * sample itself omit it.
+     */
+    sampledAt?: number;
+
     /** Which hand produced the gesture. */
     handedness: Handedness;
 
