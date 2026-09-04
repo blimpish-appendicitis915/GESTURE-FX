@@ -225,9 +225,12 @@ those pipelines computed. A signed area over three points is a classical
 primitive, and had reliable landmark correspondences been available it could
 have been evaluated then. The contribution here is not the primitive but the
 observation that this particular one resolves the synchronisation problem
-exactly. Related geometric primitives over point sets, including the signed-area
-and containment tests we use for the two-hand window, are treated in an
-interactive setting by \citet{thakur2022quadtree}.
+exactly. The containment test of Section~\ref{sec:coverage} belongs to the same
+family as the one a quadtree applies at every node, deciding which axis-aligned
+region a point falls in; \citet{thakur2022quadtree} builds that index for the
+interactive display of large point sets, where the cost of repeating the test is
+what bounds the frame rate. The problem here is the same in kind and smaller by
+orders of magnitude: four edges, once per fragment.
 
 \subsection{Gesture recognition from landmarks}
 
@@ -236,9 +239,13 @@ vector, or a window of them, to a gesture label; the real-time architecture of
 \citet{kopuklu2019realtime} is representative, pairing a lightweight detector
 with a deeper classifier so that the expensive model runs only when a gesture is
 plausibly in progress. Rule-based recognisers instead threshold derived
-quantities such as joint angles and finger extension. The tradeoff between the
-two, and hybrids that soften it, are examined by \citet{thakur2021neurofuzzy},
-and the learned side rests on the standard apparatus surveyed in
+quantities such as joint angles and finger extension.
+The two are ends of a spectrum rather than alternatives: a neuro-fuzzy system
+keeps the rules and learns their parameters instead of fixing them by hand, which
+is the middle ground surveyed by \citet{thakur2021neurofuzzy}. The learned end
+produces its per-frame label from a parameterised network trained by gradient
+descent, and the models and learning rules that make one, from the limitations of
+the perceptron to the rectified unit that answers them, are set out in
 \citet{thakur2021neuralnetworks}.
 
 Both families return a per-frame decision, and therefore an interval once
@@ -301,16 +308,22 @@ behaviour in wall-clock time is invariant to the inference rate.
 
 \subsection{Appearance transformation of video}
 
-Restyling a subject is well studied as a learned image-to-image problem, in the
-adversarial formulation surveyed by \citet{thakur2021gans} and in the particular
-settings of white-box cartoonisation \citep{thakur2021cartoonization}, where the
-objective is an explicitly decomposed cartoon representation rather than an
-opaque mapping, and open-domain sketch-to-photo synthesis
-\citep{thakur2021aoda}. Such methods synthesise content absent from the input,
-which is exactly what allows them to replace a subject and exactly what makes
-them unsuitable under a constraint of zero marginal cost and bounded latency: a
-generative model of useful quality is either hosted, and therefore metered, or
-too slow for interactive compositing.
+Restyling a subject is well studied as a learned image-to-image problem. The
+adversarial formulation it usually takes, a generator trained against a
+discriminator until its output is not separable from the target distribution,
+and the variants that formulation has since acquired, are surveyed by
+\citet{thakur2021gans}. Two instances of it matter here. White-box
+cartoonisation \citep{thakur2021cartoonization} learns an explicitly decomposed
+representation, a surface carrying flat regions, a structure carrying segmented
+colour and a texture carrying contours, rather than an opaque mapping; it is that
+decomposition, and not its training, that Section~\ref{sec:stylise} reproduces
+analytically. Open-domain sketch-to-photo synthesis \citep{thakur2021aoda} must
+produce photographic content for sketch classes absent from its training set,
+which is the sharpest case of the property at issue. Such methods synthesise
+content absent from the input, which is exactly what allows them to replace a
+subject and exactly what makes them unsuitable under a constraint of zero
+marginal cost and bounded latency: a generative model of useful quality is either
+hosted, and therefore metered, or too slow for interactive compositing.
 
 We use an analytic shader instead, and are explicit in
 Section~\ref{sec:limitations} that this restyles the subject present in the
@@ -640,10 +653,15 @@ though it was decided later. The clamp by $\Delta$ ensures the onset is not
 skipped when confirmation is slow, at the cost of a bounded misalignment; we use
 $\Delta = 120$\,ms.
 
-This is the same distinction that arises between the time an event occurs and
-the time it is observed in a distributed system \citep{thakur2022clocksync}: the
-useful ordering is by cause, and the observation time is an artefact of the
-observer.
+The distinction is the one a distributed system draws between when an event
+happened and when a process learned of it. Ordering by a clock read at the
+observer orders by arrival, which is a property of the network rather than of the
+events; Lamport's happened-before relation orders by cause instead, and the
+physical algorithms that narrow the gap sit alongside the logical and vector
+clocks that sidestep it in \citet{thakur2022clocksync}. Anchoring the timeline on
+$\hat{t}^\star$ rather than on $t_c$ is the same choice made for the same reason:
+the confirmation time is a property of the rate at which the hand is sampled, not
+of the gesture.
 
 \subsection{Retrospective compositing}
 \label{sec:rewind}
